@@ -1,0 +1,27 @@
+R_DEF: Internal format may change without notice
+local
+color black
+color white
+drawable bottom_control_bg
+drawable btn_capture_circle
+drawable btn_round_dark
+drawable ic_back
+drawable ic_filter
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+id btnBackToCamera
+id btnCapture
+id btnFilter
+id controlLayout
+id imageView
+id mainLayout
+id previewView
+id tvPermissionStatus
+layout activity_main
+mipmap ic_launcher
+mipmap ic_launcher_round
+string app_name
+style Base.Theme.CameraApp
+style Theme.CameraApp
+xml backup_rules
+xml data_extraction_rules
