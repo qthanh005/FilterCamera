@@ -24,12 +24,12 @@
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\xml\\backup_rules.xml"
     },
     {
-        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_btn_secondary.xml.flat",
-        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\btn_secondary.xml"
-    },
-    {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_btn_capture_circle.xml.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\btn_capture_circle.xml"
+    },
+    {
+        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_ic_check.png.flat",
+        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\ic_check.png"
     },
     {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\mipmap-hdpi_ic_launcher.webp.flat",
@@ -56,10 +56,6 @@
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\mipmap-xxxhdpi\\ic_launcher.webp"
     },
     {
-        "merged": "com.example.cameraapp-debug-37:/layout_item_filter.xml.flat",
-        "source": "com.example.cameraapp-main-39:/layout/item_filter.xml"
-    },
-    {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_ic_back.png.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\ic_back.png"
     },
@@ -72,6 +68,10 @@
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\xml\\data_extraction_rules.xml"
     },
     {
+        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_ic_placeholder.png.flat",
+        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\ic_placeholder.png"
+    },
+    {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\mipmap-mdpi_ic_launcher.webp.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\mipmap-mdpi\\ic_launcher.webp"
     },
@@ -80,24 +80,12 @@
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\mipmap-xhdpi\\ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\mipmap-xhdpi_ic_launcher.webp.flat",
-        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\mipmap-xhdpi\\ic_launcher.webp"
-    },
-    {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\mipmap-mdpi_ic_launcher_round.webp.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\mipmap-mdpi\\ic_launcher_round.webp"
     },
     {
-        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_bg_control_blur.xml.flat",
-        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\bg_control_blur.xml"
-    },
-    {
-        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_btn_round_dark.xml.flat",
-        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\btn_round_dark.xml"
-    },
-    {
-        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_btn_capture.xml.flat",
-        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\btn_capture.xml"
+        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\mipmap-xhdpi\\ic_launcher.webp"
     },
     {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_ic_launcher_background.xml.flat",
@@ -110,5 +98,13 @@
     {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_ic_launcher_foreground.xml.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_btn_round_dark.xml.flat",
+        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\btn_round_dark.xml"
+    },
+    {
+        "merged": "com.example.cameraapp-debug-37:/drawable_default_preview.jpg.flat",
+        "source": "com.example.cameraapp-main-39:/drawable/default_preview.jpg"
     }
 ]

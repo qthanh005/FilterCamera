@@ -79,7 +79,6 @@
             android:id="@+id/btnFilter"
             android:layout_width="52dp"
             android:layout_height="52dp"
-            android:backgroundTint="#333333"
             android:background="@drawable/btn_round_dark"
             android:padding="10dp"
             android:src="@drawable/ic_filter"
@@ -97,7 +96,7 @@
             android:contentDescription="Capture"
             android:layout_marginHorizontal="20dp" />
 
-        <!-- Nút quay lại (hiện khi xem ảnh) -->
+        <!-- Nút quay lại -->
         <ImageButton
             android:id="@+id/btnBackToCamera"
             android:layout_width="52dp"
@@ -108,6 +107,19 @@
             app:tint="#FFFFFF"
             android:contentDescription="Quay lại"
             android:visibility="gone"
+            android:layout_marginHorizontal="12dp" />
+
+        <!-- Nút lưu ảnh -->
+        <ImageButton
+            android:id="@+id/btnSave"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:background="@drawable/btn_round_dark"
+            android:padding="10dp"
+            android:src="@drawable/ic_check"
+            android:contentDescription="Lưu ảnh"
+            android:visibility="gone"
+            app:tint="#FFFFFF"
             android:layout_marginHorizontal="12dp" />
     </LinearLayout>
 

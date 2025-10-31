@@ -39,6 +39,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.example.cameraapp.FilterItem.FilterType.*;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,12 +51,13 @@ public class MainActivity extends AppCompatActivity {
     private ImageCapture imageCapture;
     private ExecutorService cameraExecutor;
 
-    private ImageButton btnCapture, btnFilter, btnBack;
+    private ImageButton btnCapture, btnFilter, btnBack, btnSave;
     private ImageView imageView;
     private TextView tvPermissionStatus;
     private RecyclerView rvFilters;
 
     private Bitmap capturedBitmap = null;
+    private Bitmap appliedBitmap = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         btnCapture = findViewById(R.id.btnCapture);
         btnFilter = findViewById(R.id.btnFilter);
         btnBack = findViewById(R.id.btnBackToCamera);
+        btnSave = findViewById(R.id.btnSave);
         imageView = findViewById(R.id.imageView);
         tvPermissionStatus = findViewById(R.id.tvPermissionStatus);
         rvFilters = findViewById(R.id.rvFilters);
@@ -77,6 +84,15 @@ public class MainActivity extends AppCompatActivity {
                 rvFilters.setVisibility(rvFilters.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
             }
         });
+        btnSave.setOnClickListener(v -> {
+            if (appliedBitmap != null) {
+                boolean ok = saveBitmapToGallery(appliedBitmap);
+                Toast.makeText(MainActivity.this, ok ? "Ảnh đã lưu!" : "Lưu ảnh thất bại", Toast.LENGTH_SHORT).show();
+                if (ok) {
+                    backToCamera();
+                }
+            }
+        });
     }
 
     private boolean hasCameraPermission() {
@@ -84,6 +100,29 @@ public class MainActivity extends AppCompatActivity {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    private Bitmap getCorrectBitmap(Uri uri) {
+        try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+            // Đọc Exif để biết orientation
+            InputStream exifInputStream = getContentResolver().openInputStream(uri);
+            ExifInterface exif = new ExifInterface(exifInputStream);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+            Matrix matrix = new Matrix();
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90: matrix.postRotate(90); break;
+                case ExifInterface.ORIENTATION_ROTATE_180: matrix.postRotate(180); break;
+                case ExifInterface.ORIENTATION_ROTATE_270: matrix.postRotate(270); break;
+                default: break;
+            }
+
+            return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     private void updateCameraState() {
         new android.os.Handler().postDelayed(() -> {
             if (hasCameraPermission()) {
@@ -150,35 +189,29 @@ public class MainActivity extends AppCompatActivity {
     private void capturePhoto() {
         if (imageCapture == null) return;
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "CameraX_" + System.currentTimeMillis());
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+        try {
+            File tempFile = new File(getCacheDir(), "capture_" + System.currentTimeMillis() + ".jpg");
+            ImageCapture.OutputFileOptions outputOptions =
+                    new ImageCapture.OutputFileOptions.Builder(tempFile).build();
 
-        ImageCapture.OutputFileOptions outputOptions =
-                new ImageCapture.OutputFileOptions.Builder(
-                        getContentResolver(),
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        contentValues
-                ).build();
+            imageCapture.takePicture(outputOptions, cameraExecutor,
+                    new ImageCapture.OnImageSavedCallback() {
+                        @Override
+                        public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                            Uri uri = Uri.fromFile(tempFile);
+                            runOnUiThread(() -> showCapturedImage(uri));
+                        }
 
-        imageCapture.takePicture(outputOptions, cameraExecutor,
-                new ImageCapture.OnImageSavedCallback() {
-                    @Override
-                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                        Uri savedUri = outputFileResults.getSavedUri();
-                        runOnUiThread(() -> {
-                            Toast.makeText(MainActivity.this, "Ảnh đã lưu!", Toast.LENGTH_SHORT).show();
-                            showCapturedImage(savedUri);
-                        });
-                    }
-
-                    @Override
-                    public void onError(@NonNull ImageCaptureException exception) {
-                        runOnUiThread(() ->
-                                Toast.makeText(MainActivity.this, "Lỗi khi chụp: " + exception.getMessage(), Toast.LENGTH_SHORT).show()
-                        );
-                    }
-                });
+                        @Override
+                        public void onError(@NonNull ImageCaptureException exception) {
+                            runOnUiThread(() ->
+                                    Toast.makeText(MainActivity.this, "Lỗi khi chụp: " + exception.getMessage(), Toast.LENGTH_SHORT).show()
+                            );
+                        }
+                    });
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi khi chụp: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showCapturedImage(Uri uri) {
@@ -186,24 +219,27 @@ public class MainActivity extends AppCompatActivity {
         btnCapture.setVisibility(View.GONE);
         btnFilter.setVisibility(View.VISIBLE);
         btnBack.setVisibility(View.VISIBLE);
+        btnSave.setVisibility(View.VISIBLE);
         imageView.setVisibility(View.VISIBLE);
 
+        // Glide vẫn load để hiển thị nhanh
         Glide.with(this).load(uri).into(imageView);
 
-        try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
-            capturedBitmap = BitmapFactory.decodeStream(inputStream);
-            stopCamera();
-        } catch (Exception e) { e.printStackTrace(); }
+        // Load bitmap đúng hướng
+        capturedBitmap = getCorrectBitmap(uri);
+        appliedBitmap = capturedBitmap;
 
         setupFilterRecyclerView();
+        stopCamera();
     }
 
     private void setupFilterRecyclerView() {
-        if (capturedBitmap == null) return;
+        // Luôn dùng ảnh nền mặc định để preview filter
+        Bitmap previewSource = BitmapFactory.decodeResource(getResources(), R.drawable.default_preview);
+
+        Bitmap preview = Bitmap.createScaledBitmap(previewSource, 100, 100, true);
 
         List<FilterItem> filterList = new ArrayList<>();
-        Bitmap preview = Bitmap.createScaledBitmap(capturedBitmap, 100, 100, true);
-
         filterList.add(new FilterItem("Normal", preview, NORMAL));
         filterList.add(new FilterItem("Gray", FilterUtils.filterGray(preview), GRAY));
         filterList.add(new FilterItem("Sepia", FilterUtils.filterSepia(preview), SEPIA));
@@ -214,18 +250,21 @@ public class MainActivity extends AppCompatActivity {
         filterList.add(new FilterItem("Vintage", FilterUtils.filterVintage(preview), VINTAGE));
 
         FilterAdapter adapter = new FilterAdapter(this, filterList, filter -> {
-            Bitmap filteredBitmap = capturedBitmap;
-            switch (filter.type) {
-                case GRAY: filteredBitmap = FilterUtils.filterGray(capturedBitmap); break;
-                case SEPIA: filteredBitmap = FilterUtils.filterSepia(capturedBitmap); break;
-                case BRIGHT: filteredBitmap = FilterUtils.filterBright(capturedBitmap, 1.2f); break;
-                case INVERT: filteredBitmap = FilterUtils.filterInvert(capturedBitmap); break;
-                case CONTRAST: filteredBitmap = FilterUtils.filterContrast(capturedBitmap, 1.3f); break;
-                case HUE: filteredBitmap = FilterUtils.filterHue(capturedBitmap, 45f); break;
-                case VINTAGE: filteredBitmap = FilterUtils.filterVintage(capturedBitmap); break;
-                case NORMAL: filteredBitmap = capturedBitmap; break;
+            if (capturedBitmap != null) {
+                Bitmap filteredBitmap = capturedBitmap;
+                switch (filter.type) {
+                    case GRAY: filteredBitmap = FilterUtils.filterGray(capturedBitmap); break;
+                    case SEPIA: filteredBitmap = FilterUtils.filterSepia(capturedBitmap); break;
+                    case BRIGHT: filteredBitmap = FilterUtils.filterBright(capturedBitmap, 1.2f); break;
+                    case INVERT: filteredBitmap = FilterUtils.filterInvert(capturedBitmap); break;
+                    case CONTRAST: filteredBitmap = FilterUtils.filterContrast(capturedBitmap, 1.3f); break;
+                    case HUE: filteredBitmap = FilterUtils.filterHue(capturedBitmap, 45f); break;
+                    case VINTAGE: filteredBitmap = FilterUtils.filterVintage(capturedBitmap); break;
+                    case NORMAL: filteredBitmap = capturedBitmap; break;
+                }
+                appliedBitmap = filteredBitmap;
+                imageView.setImageBitmap(filteredBitmap);
             }
-            imageView.setImageBitmap(filteredBitmap);
         });
 
         rvFilters.setAdapter(adapter);
@@ -233,15 +272,36 @@ public class MainActivity extends AppCompatActivity {
         rvFilters.setVisibility(View.VISIBLE);
     }
 
+
     private void backToCamera() {
         imageView.setVisibility(View.GONE);
         btnFilter.setVisibility(View.GONE);
         btnBack.setVisibility(View.GONE);
+        btnSave.setVisibility(View.GONE);
         rvFilters.setVisibility(View.GONE);
         previewView.setVisibility(View.VISIBLE);
         btnCapture.setVisibility(View.VISIBLE);
 
         if (hasCameraPermission()) startCamera();
+    }
+
+    private boolean saveBitmapToGallery(@NonNull Bitmap bitmap) {
+        try {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "CameraX_" + System.currentTimeMillis());
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
+            Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+            if (uri == null) return false;
+            OutputStream os = getContentResolver().openOutputStream(uri);
+            if (os == null) return false;
+            boolean ok = bitmap.compress(Bitmap.CompressFormat.JPEG, 95, os);
+            os.flush();
+            os.close();
+            return ok;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void stopCamera() {
