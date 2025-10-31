@@ -32,10 +32,6 @@
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\btn_capture_circle.xml"
     },
     {
-        "merged": "com.example.cameraapp-debug-37:/layout_activity_main.xml.flat",
-        "source": "com.example.cameraapp-main-39:/layout/activity_main.xml"
-    },
-    {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\mipmap-hdpi_ic_launcher.webp.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\mipmap-hdpi\\ic_launcher.webp"
     },
@@ -48,8 +44,20 @@
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\mipmap-hdpi\\ic_launcher_round.webp"
     },
     {
+        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\layout_item_filter.xml.flat",
+        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\layout\\item_filter.xml"
+    },
+    {
+        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_filter_item_bg.xml.flat",
+        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\drawable\\filter_item_bg.xml"
+    },
+    {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-39:\\mipmap-xxxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "com.example.cameraapp-debug-37:/layout_item_filter.xml.flat",
+        "source": "com.example.cameraapp-main-39:/layout/item_filter.xml"
     },
     {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-37:\\drawable_ic_back.png.flat",

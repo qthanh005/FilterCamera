@@ -17,7 +17,7 @@
         android:scaleType="fitCenter"
         android:background="#000000"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/controlLayout"
+        app:layout_constraintBottom_toTopOf="@+id/rvFilters"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -30,11 +30,11 @@
         android:visibility="gone"
         android:background="#000000"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/controlLayout"
+        app:layout_constraintBottom_toTopOf="@+id/rvFilters"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 🟢 TextView hiển thị trạng thái quyền -->
+    <!-- TextView hiển thị trạng thái quyền -->
     <TextView
         android:id="@+id/tvPermissionStatus"
         android:layout_width="wrap_content"
@@ -44,6 +44,19 @@
         android:textColor="#CCCCCC"
         android:background="@android:color/transparent"
         android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/rvFilters"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- RecyclerView lướt filter -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvFilters"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:visibility="gone"
+        android:padding="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/controlLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

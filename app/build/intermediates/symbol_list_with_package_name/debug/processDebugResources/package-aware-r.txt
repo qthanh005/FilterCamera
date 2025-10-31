@@ -3005,6 +3005,7 @@ drawable design_ic_visibility
 drawable design_ic_visibility_off
 drawable design_password_eye
 drawable design_snackbar_background
+drawable filter_item_bg
 drawable ic_arrow_back_black_24
 drawable ic_back
 drawable ic_call_answer
@@ -3334,6 +3335,7 @@ id ignore
 id ignoreRequest
 id image
 id imageView
+id imgFilterItem
 id immediateStop
 id included
 id indeterminate
@@ -3483,6 +3485,7 @@ id right_icon
 id right_side
 id rounded
 id row_index_key
+id rvFilters
 id save_non_transition_alpha
 id save_overlay_view
 id sawtooth
@@ -3593,6 +3596,7 @@ id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
 id triangle
+id tvFilterName
 id tvPermissionStatus
 id unchecked
 id uniform
@@ -3750,6 +3754,7 @@ layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout ime_base_split_test_activity
 layout ime_secondary_split_test_activity
+layout item_filter
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title
@@ -4272,6 +4277,7 @@ style Base_Widget_MaterialComponents_TextView
 style CardView
 style CardView_Dark
 style CardView_Light
+style CircleImage
 style MaterialAlertDialog_Material3
 style MaterialAlertDialog_Material3_Animation
 style MaterialAlertDialog_Material3_Body_Text

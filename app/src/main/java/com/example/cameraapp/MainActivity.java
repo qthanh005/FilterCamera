@@ -6,11 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Paint;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -29,14 +25,20 @@ import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static com.example.cameraapp.FilterItem.FilterType.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,9 +49,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton btnCapture, btnFilter, btnBack;
     private ImageView imageView;
     private TextView tvPermissionStatus;
+    private RecyclerView rvFilters;
 
     private Bitmap capturedBitmap = null;
-    private boolean isGray = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,23 +64,26 @@ public class MainActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBackToCamera);
         imageView = findViewById(R.id.imageView);
         tvPermissionStatus = findViewById(R.id.tvPermissionStatus);
+        rvFilters = findViewById(R.id.rvFilters);
 
         cameraExecutor = Executors.newSingleThreadExecutor();
 
         updateCameraState();
 
         btnCapture.setOnClickListener(v -> capturePhoto());
-        btnFilter.setOnClickListener(v -> applyGrayFilter());
         btnBack.setOnClickListener(v -> backToCamera());
+        btnFilter.setOnClickListener(v -> {
+            if (capturedBitmap != null) {
+                rvFilters.setVisibility(rvFilters.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+            }
+        });
     }
 
-    // ✅ Chỉ kiểm tra, không bao giờ xin quyền
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    // Cập nhật giao diện tùy theo trạng thái quyền
     private void updateCameraState() {
         new android.os.Handler().postDelayed(() -> {
             if (hasCameraPermission()) {
@@ -86,39 +91,29 @@ public class MainActivity extends AppCompatActivity {
                 previewView.setVisibility(View.VISIBLE);
                 btnCapture.setVisibility(View.VISIBLE);
                 startCamera();
-
-                // ✅ Đánh dấu là đã có quyền (reset flag)
-                getSharedPreferences("camera_prefs", MODE_PRIVATE)
-                        .edit().putBoolean("dialog_shown", false).apply();
-
             } else {
-                stopCamera();
                 tvPermissionStatus.setVisibility(View.VISIBLE);
-                tvPermissionStatus.setText("⚠ Quyền camera chưa được bật.\nVui lòng vào Cài đặt → Quyền → Bật Camera cho ứng dụng này.");
+                tvPermissionStatus.setText("⚠ Quyền camera chưa được bật.");
                 previewView.setVisibility(View.GONE);
                 btnCapture.setVisibility(View.GONE);
 
-                // ⚠️ Kiểm tra xem đã hiện dialog trước đó chưa
                 boolean shownBefore = getSharedPreferences("camera_prefs", MODE_PRIVATE)
                         .getBoolean("dialog_shown", false);
 
                 if (!isFinishing() && !shownBefore) {
                     new AlertDialog.Builder(this)
                             .setTitle("Cần quyền Camera")
-                            .setMessage("Ứng dụng cần quyền Camera để chụp ảnh.\n\nHãy mở Cài đặt → Quyền → Bật Camera cho ứng dụng này.")
+                            .setMessage("Ứng dụng cần quyền Camera để chụp ảnh.\nHãy mở Cài đặt → Quyền → Bật Camera.")
                             .setPositiveButton("Mở Cài đặt", (dialog, which) -> openAppSettings())
                             .setNegativeButton("Thoát", (dialog, which) -> finish())
                             .setCancelable(false)
                             .show();
-
-                    // ✅ Ghi nhớ rằng popup này đã được hiển thị
                     getSharedPreferences("camera_prefs", MODE_PRIVATE)
                             .edit().putBoolean("dialog_shown", true).apply();
                 }
             }
         }, 300);
     }
-
 
     private void openAppSettings() {
         Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -139,9 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
                     Preview preview = new Preview.Builder().build();
                     imageCapture = new ImageCapture.Builder().build();
-
                     CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-
                     preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
                     cameraProvider.unbindAll();
@@ -151,16 +144,7 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }, ContextCompat.getMainExecutor(this));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void stopCamera() {
-        try {
-            ProcessCameraProvider cameraProvider = ProcessCameraProvider.getInstance(this).get();
-            cameraProvider.unbindAll();
-        } catch (Exception ignored) {}
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void capturePhoto() {
@@ -209,46 +193,68 @@ public class MainActivity extends AppCompatActivity {
         try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
             capturedBitmap = BitmapFactory.decodeStream(inputStream);
             stopCamera();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        setupFilterRecyclerView();
     }
 
-    private void applyGrayFilter() {
+    private void setupFilterRecyclerView() {
         if (capturedBitmap == null) return;
 
-        Bitmap filtered = Bitmap.createBitmap(
-                capturedBitmap.getWidth(),
-                capturedBitmap.getHeight(),
-                capturedBitmap.getConfig()
-        );
+        List<FilterItem> filterList = new ArrayList<>();
+        Bitmap preview = Bitmap.createScaledBitmap(capturedBitmap, 100, 100, true);
 
-        android.graphics.Canvas canvas = new android.graphics.Canvas(filtered);
-        Paint paint = new Paint();
-        ColorMatrix cm = new ColorMatrix();
-        cm.setSaturation(0);
-        paint.setColorFilter(new ColorMatrixColorFilter(cm));
-        canvas.drawBitmap(capturedBitmap, 0, 0, paint);
+        filterList.add(new FilterItem("Normal", preview, NORMAL));
+        filterList.add(new FilterItem("Gray", FilterUtils.filterGray(preview), GRAY));
+        filterList.add(new FilterItem("Sepia", FilterUtils.filterSepia(preview), SEPIA));
+        filterList.add(new FilterItem("Bright", FilterUtils.filterBright(preview, 1.2f), BRIGHT));
+        filterList.add(new FilterItem("Invert", FilterUtils.filterInvert(preview), INVERT));
+        filterList.add(new FilterItem("Contrast", FilterUtils.filterContrast(preview, 1.3f), CONTRAST));
+        filterList.add(new FilterItem("Hue", FilterUtils.filterHue(preview, 45f), HUE));
+        filterList.add(new FilterItem("Vintage", FilterUtils.filterVintage(preview), VINTAGE));
 
-        imageView.setImageBitmap(filtered);
-        isGray = true;
-        Toast.makeText(this, "Đã áp filter xám!", Toast.LENGTH_SHORT).show();
+        FilterAdapter adapter = new FilterAdapter(this, filterList, filter -> {
+            Bitmap filteredBitmap = capturedBitmap;
+            switch (filter.type) {
+                case GRAY: filteredBitmap = FilterUtils.filterGray(capturedBitmap); break;
+                case SEPIA: filteredBitmap = FilterUtils.filterSepia(capturedBitmap); break;
+                case BRIGHT: filteredBitmap = FilterUtils.filterBright(capturedBitmap, 1.2f); break;
+                case INVERT: filteredBitmap = FilterUtils.filterInvert(capturedBitmap); break;
+                case CONTRAST: filteredBitmap = FilterUtils.filterContrast(capturedBitmap, 1.3f); break;
+                case HUE: filteredBitmap = FilterUtils.filterHue(capturedBitmap, 45f); break;
+                case VINTAGE: filteredBitmap = FilterUtils.filterVintage(capturedBitmap); break;
+                case NORMAL: filteredBitmap = capturedBitmap; break;
+            }
+            imageView.setImageBitmap(filteredBitmap);
+        });
+
+        rvFilters.setAdapter(adapter);
+        rvFilters.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvFilters.setVisibility(View.VISIBLE);
     }
 
     private void backToCamera() {
         imageView.setVisibility(View.GONE);
         btnFilter.setVisibility(View.GONE);
         btnBack.setVisibility(View.GONE);
+        rvFilters.setVisibility(View.GONE);
         previewView.setVisibility(View.VISIBLE);
         btnCapture.setVisibility(View.VISIBLE);
 
         if (hasCameraPermission()) startCamera();
     }
 
+    private void stopCamera() {
+        try {
+            ProcessCameraProvider cameraProvider = ProcessCameraProvider.getInstance(this).get();
+            cameraProvider.unbindAll();
+        } catch (Exception ignored) {}
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        updateCameraState(); // 🔄 Tự kiểm tra lại quyền mỗi khi quay lại app
+        updateCameraState();
     }
 
     @Override

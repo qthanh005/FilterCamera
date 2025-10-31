@@ -1,93 +1,81 @@
 package com.example.cameraapp;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.net.Uri;
-import android.media.ExifInterface;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 public class FilterUtils {
 
-    // 🩶 Grayscale filter
-    public static Bitmap toGrayScale(Bitmap original) {
-        Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
+    public static Bitmap applyColorMatrix(Bitmap src, ColorMatrix cm) {
+        Bitmap result = Bitmap.createBitmap(src.getWidth(), src.getHeight(), src.getConfig());
         Canvas canvas = new Canvas(result);
         Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(cm));
+        canvas.drawBitmap(src, 0, 0, paint);
+        return result;
+    }
+
+    public static Bitmap filterGray(Bitmap src) {
         ColorMatrix cm = new ColorMatrix();
         cm.setSaturation(0);
-        paint.setColorFilter(new ColorMatrixColorFilter(cm));
-        canvas.drawBitmap(original, 0, 0, paint);
-        return result;
+        return applyColorMatrix(src, cm);
     }
 
-    // 🟤 Sepia filter
-    public static Bitmap toSepia(Bitmap original) {
-        Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
-        Canvas canvas = new Canvas(result);
-        Paint paint = new Paint();
-
+    public static Bitmap filterSepia(Bitmap src) {
         ColorMatrix cm = new ColorMatrix();
-        cm.setScale(1f, 1f, 0.8f, 1f); // tone vàng nhẹ
-        paint.setColorFilter(new ColorMatrixColorFilter(cm));
-
-        canvas.drawBitmap(original, 0, 0, paint);
-        return result;
+        cm.setScale(1f, 0.95f, 0.82f, 1.0f);
+        return applyColorMatrix(src, cm);
     }
 
-    // 🔵 Invert (âm bản)
-    public static Bitmap toInvert(Bitmap original) {
-        Bitmap result = Bitmap.createBitmap(original.getWidth(), original.getHeight(), original.getConfig());
-        Canvas canvas = new Canvas(result);
-        Paint paint = new Paint();
-
+    public static Bitmap filterBright(Bitmap src, float value) {
         ColorMatrix cm = new ColorMatrix(new float[]{
-                -1.0f, 0, 0, 0, 255,
-                0, -1.0f, 0, 0, 255,
-                0, 0, -1.0f, 0, 255,
-                0, 0, 0, 1.0f, 0
+                value, 0, 0, 0, 0,
+                0, value, 0, 0, 0,
+                0, 0, value, 0, 0,
+                0, 0, 0, 1, 0
         });
-        paint.setColorFilter(new ColorMatrixColorFilter(cm));
-
-        canvas.drawBitmap(original, 0, 0, paint);
-        return result;
+        return applyColorMatrix(src, cm);
     }
 
-    // 🧭 Fix ảnh xoay sai hướng theo EXIF
-    public static Bitmap fixImageRotation(Context context, Uri uri, Bitmap bitmap) {
-        try (InputStream input = context.getContentResolver().openInputStream(uri)) {
-            ExifInterface exif = new ExifInterface(input);
-            int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            int degrees = 0;
+    public static Bitmap filterInvert(Bitmap src) {
+        ColorMatrix cm = new ColorMatrix(new float[]{
+                -1, 0, 0, 0, 255,
+                0, -1, 0, 0, 255,
+                0, 0, -1, 0, 255,
+                0, 0, 0, 1, 0
+        });
+        return applyColorMatrix(src, cm);
+    }
 
-            switch (rotation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    degrees = 90;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    degrees = 180;
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    degrees = 270;
-                    break;
-            }
+    public static Bitmap filterContrast(Bitmap src, float contrast) {
+        float scale = contrast;
+        float translate = (-0.5f * scale + 0.5f) * 255.f;
+        ColorMatrix cm = new ColorMatrix(new float[]{
+                scale, 0, 0, 0, translate,
+                0, scale, 0, 0, translate,
+                0, 0, scale, 0, translate,
+                0, 0, 0, 1, 0
+        });
+        return applyColorMatrix(src, cm);
+    }
 
-            if (degrees != 0) {
-                Matrix matrix = new Matrix();
-                matrix.postRotate(degrees);
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            }
+    public static Bitmap filterHue(Bitmap src, float hue) {
+        ColorMatrix cm = new ColorMatrix();
+        cm.setRotate(0, hue);
+        cm.setRotate(1, hue);
+        cm.setRotate(2, hue);
+        return applyColorMatrix(src, cm);
+    }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return bitmap;
+    public static Bitmap filterVintage(Bitmap src) {
+        ColorMatrix cm = new ColorMatrix(new float[]{
+                0.9f, 0.1f, 0, 0, 0,
+                0.1f, 0.9f, 0, 0, 0,
+                0, 0, 0.8f, 0, 0,
+                0, 0, 0, 1, 0
+        });
+        return applyColorMatrix(src, cm);
     }
 }

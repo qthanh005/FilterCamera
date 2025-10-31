@@ -3004,6 +3004,7 @@ int drawable design_ic_visibility 0x7f070083
 int drawable design_ic_visibility_off 0x7f070084
 int drawable design_password_eye 0x7f070085
 int drawable design_snackbar_background 0x7f070086
+int drawable filter_item_bg 0x7f0700ef
 int drawable ic_arrow_back_black_24 0x7f070087
 int drawable ic_back 0x7f0700ea
 int drawable ic_call_answer 0x7f070088
@@ -3333,6 +3334,7 @@ int id ignore 0x7f0800e2
 int id ignoreRequest 0x7f0800e3
 int id image 0x7f0800e4
 int id imageView 0x7f0800e5
+int id imgFilterItem 0x7f080203
 int id immediateStop 0x7f0800e6
 int id included 0x7f0800e7
 int id indeterminate 0x7f0800e8
@@ -3482,6 +3484,7 @@ int id right_icon 0x7f080177
 int id right_side 0x7f080178
 int id rounded 0x7f080179
 int id row_index_key 0x7f08017a
+int id rvFilters 0x7f080204
 int id save_non_transition_alpha 0x7f08017b
 int id save_overlay_view 0x7f08017c
 int id sawtooth 0x7f08017d
@@ -3592,6 +3595,7 @@ int id transition_position 0x7f0801e5
 int id transition_scene_layoutid_cache 0x7f0801e6
 int id transition_transform 0x7f0801e7
 int id triangle 0x7f0801e8
+int id tvFilterName 0x7f080205
 int id tvPermissionStatus 0x7f080202
 int id unchecked 0x7f0801e9
 int id uniform 0x7f0801ea
@@ -3749,6 +3753,7 @@ int layout design_text_input_end_icon 0x7f0b002b
 int layout design_text_input_start_icon 0x7f0b002c
 int layout ime_base_split_test_activity 0x7f0b002d
 int layout ime_secondary_split_test_activity 0x7f0b002e
+int layout item_filter 0x7f0b006c
 int layout m3_alert_dialog 0x7f0b002f
 int layout m3_alert_dialog_actions 0x7f0b0030
 int layout m3_alert_dialog_title 0x7f0b0031
@@ -4271,6 +4276,7 @@ int style Base_Widget_MaterialComponents_TextView 0x7f10011f
 int style CardView 0x7f100120
 int style CardView_Dark 0x7f100121
 int style CardView_Light 0x7f100122
+int style CircleImage 0x7f100468
 int style MaterialAlertDialog_Material3 0x7f100123
 int style MaterialAlertDialog_Material3_Animation 0x7f100124
 int style MaterialAlertDialog_Material3_Body_Text 0x7f100125

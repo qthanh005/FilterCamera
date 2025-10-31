@@ -5,6 +5,7 @@ color white
 drawable bottom_control_bg
 drawable btn_capture_circle
 drawable btn_round_dark
+drawable filter_item_bg
 drawable ic_back
 drawable ic_filter
 drawable ic_launcher_background
@@ -14,14 +15,19 @@ id btnCapture
 id btnFilter
 id controlLayout
 id imageView
+id imgFilterItem
 id mainLayout
 id previewView
+id rvFilters
+id tvFilterName
 id tvPermissionStatus
 layout activity_main
+layout item_filter
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
 style Base.Theme.CameraApp
+style CircleImage
 style Theme.CameraApp
 xml backup_rules
 xml data_extraction_rules
