@@ -2995,11 +2995,13 @@ drawable btn_checkbox_checked_mtrl
 drawable btn_checkbox_checked_to_unchecked_mtrl_animation
 drawable btn_checkbox_unchecked_mtrl
 drawable btn_checkbox_unchecked_to_checked_mtrl_animation
+drawable btn_gallery_bg
 drawable btn_radio_off_mtrl
 drawable btn_radio_off_to_on_mtrl_animation
 drawable btn_radio_on_mtrl
 drawable btn_radio_on_to_off_mtrl_animation
 drawable btn_round_dark
+drawable btn_switch_camera_bg
 drawable default_preview
 drawable design_fab_background
 drawable design_ic_visibility
@@ -3019,6 +3021,7 @@ drawable ic_check
 drawable ic_clear_black_24
 drawable ic_clock_black_24dp
 drawable ic_filter
+drawable ic_gallery
 drawable ic_keyboard_black_24dp
 drawable ic_launcher_background
 drawable ic_launcher_foreground
@@ -3029,8 +3032,8 @@ drawable ic_mtrl_checked_circle
 drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
-drawable ic_placeholder
 drawable ic_search_black_24
+drawable ic_switch_camera
 drawable indeterminate_static
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
@@ -3208,7 +3211,9 @@ id bounceStart
 id btnBackToCamera
 id btnCapture
 id btnFilter
+id btnGallery
 id btnSave
+id btnSwitchCamera
 id buttonPanel
 id cache_measures
 id callMeasure

@@ -1,4 +1,4 @@
-#Fri Oct 31 14:27:24 ICT 2025
+#Sat Nov 01 08:47:09 ICT 2025
 base.0=D\:\\UDDD\\GKIAndroid\\FilterCamera\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=D\:\\UDDD\\GKIAndroid\\FilterCamera\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.2=D\:\\UDDD\\GKIAndroid\\FilterCamera\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\3\\classes.dex

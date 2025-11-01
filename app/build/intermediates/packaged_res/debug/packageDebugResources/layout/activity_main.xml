@@ -21,20 +21,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Ảnh hiển thị sau khi chụp -->
+    <!-- ImageView hiển thị ảnh chụp -->
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scaleType="fitCenter"
         android:visibility="gone"
-        android:background="#000000"
+        app:tint="@null"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/rvFilters"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- TextView hiển thị trạng thái quyền -->
+    <!-- TextView trạng thái quyền -->
     <TextView
         android:id="@+id/tvPermissionStatus"
         android:layout_width="wrap_content"
@@ -48,7 +48,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- RecyclerView lướt filter -->
+    <!-- RecyclerView filter -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFilters"
         android:layout_width="0dp"
@@ -61,31 +61,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Thanh điều khiển phía dưới -->
-    <LinearLayout
+    <!-- Thanh điều khiển dưới cùng -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/controlLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:padding="20dp"
+        android:padding="16dp"
         android:background="@drawable/bottom_control_bg"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Nút filter (hiện khi có ảnh) -->
+        <!-- Nút gallery (góc trái) -->
         <ImageButton
-            android:id="@+id/btnFilter"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:background="@drawable/btn_round_dark"
-            android:padding="10dp"
-            android:src="@drawable/ic_filter"
-            android:contentDescription="Filter"
-            android:visibility="gone"
-            app:tint="#FFFFFF"
-            android:layout_marginHorizontal="12dp" />
+            android:id="@+id/btnGallery"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/btn_gallery_bg"
+            android:clipToOutline="true"
+            android:contentDescription="Thư viện"
+            android:elevation="6dp"
+            android:padding="12dp"
+            android:scaleType="centerCrop"
+            android:src="@null"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnCapture"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:tint="@null" />
 
         <!-- Nút chụp chính -->
         <ImageButton
@@ -94,33 +96,83 @@
             android:layout_height="80dp"
             android:background="@drawable/btn_capture_circle"
             android:contentDescription="Capture"
-            android:layout_marginHorizontal="20dp" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Nút quay lại -->
+        <!-- ✅ Nút xoay camera -->
+
+        <!-- Nút filter -->
+
         <ImageButton
-            android:id="@+id/btnBackToCamera"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:id="@+id/btnSwitchCamera"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/btn_gallery_bg"
+            android:clipToOutline="true"
+            android:contentDescription="Đổi camera"
+            android:elevation="6dp"
+            android:padding="12dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_switch_camera"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/btnCapture"
+            app:tint="@null" />
+
+        <!-- Nút filter (góc dưới trái) -->
+        <ImageButton
+            android:id="@+id/btnFilter"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/btn_round_dark"
             android:padding="10dp"
-            android:src="@drawable/ic_back"
-            app:tint="#FFFFFF"
-            android:contentDescription="Quay lại"
+            android:src="@drawable/ic_filter"
+            android:contentDescription="Filter"
             android:visibility="gone"
-            android:layout_marginHorizontal="12dp" />
+            android:elevation="6dp"
+            app:tint="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnSave"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Nút lưu ảnh -->
+        <!-- Nút lưu ảnh (ở giữa) -->
         <ImageButton
             android:id="@+id/btnSave"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:background="@drawable/btn_round_dark"
             android:padding="10dp"
             android:src="@drawable/ic_check"
             android:contentDescription="Lưu ảnh"
             android:visibility="gone"
             app:tint="#FFFFFF"
-            android:layout_marginHorizontal="12dp" />
-    </LinearLayout>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Nút quay lại (góc dưới phải) -->
+        <ImageButton
+            android:id="@+id/btnBackToCamera"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/btn_round_dark"
+            android:padding="10dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Quay lại"
+            android:visibility="gone"
+            android:elevation="6dp"
+            app:tint="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/btnSave" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

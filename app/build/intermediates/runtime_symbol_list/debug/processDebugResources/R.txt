@@ -2994,11 +2994,13 @@ int drawable btn_checkbox_checked_mtrl 0x7f07007a
 int drawable btn_checkbox_checked_to_unchecked_mtrl_animation 0x7f07007b
 int drawable btn_checkbox_unchecked_mtrl 0x7f07007c
 int drawable btn_checkbox_unchecked_to_checked_mtrl_animation 0x7f07007d
+int drawable btn_gallery_bg 0x7f0700f4
 int drawable btn_radio_off_mtrl 0x7f07007e
 int drawable btn_radio_off_to_on_mtrl_animation 0x7f07007f
 int drawable btn_radio_on_mtrl 0x7f070080
 int drawable btn_radio_on_to_off_mtrl_animation 0x7f070081
 int drawable btn_round_dark 0x7f0700ee
+int drawable btn_switch_camera_bg 0x7f0700f6
 int drawable default_preview 0x7f0700f2
 int drawable design_fab_background 0x7f070082
 int drawable design_ic_visibility 0x7f070083
@@ -3018,6 +3020,7 @@ int drawable ic_check 0x7f0700f1
 int drawable ic_clear_black_24 0x7f07008e
 int drawable ic_clock_black_24dp 0x7f07008f
 int drawable ic_filter 0x7f0700eb
+int drawable ic_gallery 0x7f0700f3
 int drawable ic_keyboard_black_24dp 0x7f070090
 int drawable ic_launcher_background 0x7f070091
 int drawable ic_launcher_foreground 0x7f070092
@@ -3028,8 +3031,8 @@ int drawable ic_mtrl_checked_circle 0x7f070096
 int drawable ic_mtrl_chip_checked_black 0x7f070097
 int drawable ic_mtrl_chip_checked_circle 0x7f070098
 int drawable ic_mtrl_chip_close_circle 0x7f070099
-int drawable ic_placeholder 0x7f0700f0
 int drawable ic_search_black_24 0x7f07009a
+int drawable ic_switch_camera 0x7f0700f7
 int drawable indeterminate_static 0x7f07009b
 int drawable m3_avd_hide_password 0x7f07009c
 int drawable m3_avd_show_password 0x7f07009d
@@ -3207,7 +3210,9 @@ int id bounceStart 0x7f080061
 int id btnBackToCamera 0x7f080062
 int id btnCapture 0x7f080063
 int id btnFilter 0x7f080064
+int id btnGallery 0x7f080208
 int id btnSave 0x7f080207
+int id btnSwitchCamera 0x7f080209
 int id buttonPanel 0x7f080065
 int id cache_measures 0x7f080066
 int id callMeasure 0x7f080067
