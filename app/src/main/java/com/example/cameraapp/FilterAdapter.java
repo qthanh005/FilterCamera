@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -40,6 +42,29 @@ public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.FilterView
         Glide.with(context).load(item.previewBitmap).circleCrop().into(holder.imgFilter);
         holder.tvFilterName.setText(item.name);
         holder.imgFilter.setOnClickListener(v -> listener.onFilterClick(item));
+        
+        // Animation cho từng filter item - hiển thị tuần tự
+        setAnimation(holder.itemView, position);
+    }
+    
+    private void setAnimation(View view, int position) {
+        // Reset animation trước
+        view.clearAnimation();
+        
+        // Tạo animation với delay dựa trên position
+        Animation animation = AnimationUtils.loadAnimation(context, R.anim.item_animation_fade_in);
+        
+        // Delay cho từng item: 50ms * position để tạo hiệu ứng tuần tự
+        animation.setStartOffset(position * 50);
+        
+        view.startAnimation(animation);
+    }
+    
+    @Override
+    public void onViewDetachedFromWindow(@NonNull FilterViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        // Clear animation khi view bị detach để tránh memory leak
+        holder.itemView.clearAnimation();
     }
 
     @Override

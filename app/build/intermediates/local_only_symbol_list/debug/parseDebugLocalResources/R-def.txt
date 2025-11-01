@@ -1,5 +1,10 @@
 R_DEF: Internal format may change without notice
 local
+anim item_animation_fade_in
+anim item_animation_slide_in_left
+anim layout_animation_fade_in
+anim slide_in_bottom
+anim slide_out_bottom
 color black
 color white
 drawable bottom_control_bg

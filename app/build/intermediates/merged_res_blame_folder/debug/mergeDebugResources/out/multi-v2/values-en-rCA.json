@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.cameraapp-mergeDebugResources-35:/values-en-rCA/values-en-rCA.xml",
+            "outputFile": "com.example.cameraapp-mergeDebugResources-38:/values-en-rCA/values-en-rCA.xml",
             "map": [
                 {
                     "source": "C:\\Users\\ADMIN\\.gradle\\caches\\8.13\\transforms\\94237d7c0d7b0cca7309324ca3590961\\transformed\\appcompat-1.7.0\\res\\values-en-rCA\\values-en-rCA.xml",
