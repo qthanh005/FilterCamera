@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Animation rất nhẹ khi chọn filter -->
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <scale
+        android:duration="150"
+        android:fromXScale="1.0"
+        android:fromYScale="1.0"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:toXScale="1.08"
+        android:toYScale="1.08"
+        android:interpolator="@android:anim/accelerate_interpolator" />
+    <scale
+        android:duration="120"
+        android:startOffset="150"
+        android:fromXScale="1.08"
+        android:fromYScale="1.08"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:toXScale="1.0"
+        android:toYScale="1.0"
+        android:interpolator="@android:anim/decelerate_interpolator" />
+</set>
+

@@ -75,4 +75,7 @@ dependencies {
     implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0")
     implementation("com.google.http-client:google-http-client-gson:1.43.3")
     implementation("com.google.api-client:google-api-client-gson:2.2.0")
+
+    // ML Kit Face Detection
+    implementation("com.google.mlkit:face-detection:16.1.7")
 }

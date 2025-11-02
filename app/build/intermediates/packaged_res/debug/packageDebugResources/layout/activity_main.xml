@@ -21,6 +21,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Face Overlay để vẽ sticker lên preview -->
+    <com.example.cameraapp.FaceOverlayView
+        android:id="@+id/faceOverlayView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toTopOf="@+id/previewView"
+        app:layout_constraintBottom_toBottomOf="@+id/previewView"
+        app:layout_constraintStart_toStartOf="@+id/previewView"
+        app:layout_constraintEnd_toEndOf="@+id/previewView" />
+
     <!-- ImageView hiển thị ảnh chụp -->
     <ImageView
         android:id="@+id/imageView"

@@ -23,10 +23,12 @@ anim btn_radio_to_off_mtrl_ring_outer_path_animation
 anim btn_radio_to_on_mtrl_dot_group_animation
 anim btn_radio_to_on_mtrl_ring_outer_animation
 anim btn_radio_to_on_mtrl_ring_outer_path_animation
+anim button_click_light
 anim design_bottom_sheet_slide_in
 anim design_bottom_sheet_slide_out
 anim design_snackbar_in
 anim design_snackbar_out
+anim filter_select_light
 anim fragment_fast_out_extra_slow_in
 anim item_animation_fade_in
 anim item_animation_slide_in_left
@@ -3012,6 +3014,7 @@ drawable abc_vector_test
 drawable avd_hide_password
 drawable avd_show_password
 drawable bottom_control_bg
+drawable bottom_sheet_bg
 drawable btn_capture_circle
 drawable btn_checkbox_checked_mtrl
 drawable btn_checkbox_checked_to_unchecked_mtrl_animation
@@ -3089,6 +3092,7 @@ drawable m3_tabs_background
 drawable m3_tabs_line_indicator
 drawable m3_tabs_rounded_line_indicator
 drawable m3_tabs_transparent_background
+drawable man_face
 drawable material_cursor_drawable
 drawable material_ic_calendar_black_24dp
 drawable material_ic_clear_black_24dp
@@ -3150,6 +3154,8 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable sticker_item_bg
+drawable sunglass_sticker
 drawable test_level_drawable
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
@@ -3255,6 +3261,7 @@ id bounceEnd
 id bounceStart
 id btnBackToCamera
 id btnCapture
+id btnCloseSticker
 id btnFilter
 id btnGallery
 id btnSave
@@ -3347,6 +3354,7 @@ id escape
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
+id faceOverlayView
 id fade
 id fill
 id fillCenter
@@ -3392,6 +3400,7 @@ id ignoreRequest
 id image
 id imageView
 id imgFilterItem
+id imgStickerItem
 id immediateStop
 id included
 id indeterminate
@@ -3543,6 +3552,7 @@ id right_side
 id rounded
 id row_index_key
 id rvFilters
+id rvStickers
 id save_non_transition_alpha
 id save_overlay_view
 id sawtooth
@@ -3655,6 +3665,7 @@ id transition_transform
 id triangle
 id tvFilterName
 id tvPermissionStatus
+id tvStickerTitle
 id unchecked
 id uniform
 id unlabeled
@@ -3795,6 +3806,7 @@ layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
 layout activity_main
+layout bottom_sheet_sticker
 layout custom_dialog
 layout design_bottom_navigation_item
 layout design_bottom_sheet_dialog
@@ -3814,6 +3826,7 @@ layout design_text_input_start_icon
 layout ime_base_split_test_activity
 layout ime_secondary_split_test_activity
 layout item_filter
+layout item_sticker
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title

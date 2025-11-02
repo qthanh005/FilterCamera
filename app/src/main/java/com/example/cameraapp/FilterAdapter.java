@@ -41,7 +41,12 @@ public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.FilterView
         FilterItem item = filters.get(position);
         Glide.with(context).load(item.previewBitmap).circleCrop().into(holder.imgFilter);
         holder.tvFilterName.setText(item.name);
-        holder.imgFilter.setOnClickListener(v -> listener.onFilterClick(item));
+        holder.imgFilter.setOnClickListener(v -> {
+            // Animation nhẹ khi chọn filter
+            Animation selectAnim = AnimationUtils.loadAnimation(context, R.anim.filter_select_light);
+            v.startAnimation(selectAnim);
+            listener.onFilterClick(item);
+        });
         
         // Animation cho từng filter item - hiển thị tuần tự
         setAnimation(holder.itemView, position);

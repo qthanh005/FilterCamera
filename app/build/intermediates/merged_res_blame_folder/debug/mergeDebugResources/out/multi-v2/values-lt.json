@@ -4,7 +4,7 @@
             "outputFile": "com.example.cameraapp-mergeDebugResources-38:/values-lt/values-lt.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\ADMIN\\.gradle\\caches\\8.13\\transforms\\f5d53ffd9a25aa40e68dfe329984d192\\transformed\\play-services-base-18.0.1\\res\\values-lt\\values.xml",
+                    "source": "C:\\Users\\ADMIN\\.gradle\\caches\\8.13\\transforms\\93867947ff4e5bd3801ad65ba845b0e1\\transformed\\play-services-base-18.5.0\\res\\values-lt\\values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
@@ -55,7 +55,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\ADMIN\\.gradle\\caches\\8.13\\transforms\\a2f6f47f4e9c14b145d9f1bdc8106ff3\\transformed\\play-services-basement-18.2.0\\res\\values-lt\\values.xml",
+                    "source": "C:\\Users\\ADMIN\\.gradle\\caches\\8.13\\transforms\\c27a1f2dba39602f4ace3990a5eed05d\\transformed\\play-services-basement-18.4.0\\res\\values-lt\\values.xml",
                     "from": {
                         "startLines": "4",
                         "startColumns": "0",

@@ -12,7 +12,27 @@ public class FilterItem {
         INVERT,
         CONTRAST,
         HUE,
-        VINTAGE
+        VINTAGE,
+        // Instagram-like filters
+        CLARENDON,
+        GINGHAM,
+        MOON,
+        LARK,
+        REYES,
+        JUNO,
+        SLUMBER,
+        CREMA,
+        LUDWIG,
+        ADEN,
+        PERPETUA,
+        AMARO,
+        MAYFAIR,
+        RISE,
+        VALENCIA,
+        XPROII,
+        LOFI,
+        SIERRA,
+        WILLOW
     }
 
     public String name;

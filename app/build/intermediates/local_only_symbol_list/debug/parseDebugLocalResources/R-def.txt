@@ -1,5 +1,7 @@
 R_DEF: Internal format may change without notice
 local
+anim button_click_light
+anim filter_select_light
 anim item_animation_fade_in
 anim item_animation_slide_in_left
 anim layout_animation_fade_in
@@ -8,6 +10,7 @@ anim slide_out_bottom
 color black
 color white
 drawable bottom_control_bg
+drawable bottom_sheet_bg
 drawable btn_capture_circle
 drawable btn_gallery_bg
 drawable btn_round_dark
@@ -21,22 +24,32 @@ drawable ic_gallery
 drawable ic_launcher_background
 drawable ic_launcher_foreground
 drawable ic_switch_camera
+drawable man_face
+drawable sticker_item_bg
+drawable sunglass_sticker
 id btnBackToCamera
 id btnCapture
+id btnCloseSticker
 id btnFilter
 id btnGallery
 id btnSave
 id btnSwitchCamera
 id controlLayout
+id faceOverlayView
 id imageView
 id imgFilterItem
+id imgStickerItem
 id mainLayout
 id previewView
 id rvFilters
+id rvStickers
 id tvFilterName
 id tvPermissionStatus
+id tvStickerTitle
 layout activity_main
+layout bottom_sheet_sticker
 layout item_filter
+layout item_sticker
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
