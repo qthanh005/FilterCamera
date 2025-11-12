@@ -457,9 +457,16 @@ public class MainActivity extends AppCompatActivity {
             int faceHeight = Math.abs(bottom - top);
             int stickerSize = (int) (Math.max(faceWidth, faceHeight) * 1.2f);
             
-            // Vị trí vẽ sticker (giữa khuôn mặt)
+            // Vị trí vẽ sticker (giữa khuôn mặt hoặc trên đầu nếu là hat)
             int x = Math.min(left, right) + (faceWidth - stickerSize) / 2;
-            int y = Math.min(top, bottom) + (faceHeight - stickerSize) / 2;
+            int y;
+            if (currentStickerResId != null && isHatSticker(currentStickerResId)) {
+                // Đặt sticker hat ở trên đầu (trên top của face, offset lên một phần)
+                y = Math.min(top, bottom) - (int) (stickerSize * 0.6f);
+            } else {
+                // Sticker thông thường ở giữa mặt
+                y = Math.min(top, bottom) + (faceHeight - stickerSize) / 2;
+            }
             
             // Đảm bảo không vẽ ngoài bounds
             if (x < 0) x = 0;
@@ -976,6 +983,15 @@ public class MainActivity extends AppCompatActivity {
 
     // ==================== STICKER METHODS ====================
     
+    // Kiểm tra xem sticker có phải là hat không
+    private boolean isHatSticker(int resId) {
+        if (resId == R.drawable.chinese_long_hat_sticker || 
+            resId == R.drawable.chinese_silk_hat_sticker) {
+            return true;
+        }
+        return false;
+    }
+    
     private void showStickerSelector() {
         BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
         View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_sticker, null);
@@ -990,6 +1006,8 @@ public class MainActivity extends AppCompatActivity {
         List<Integer> stickerList = new ArrayList<>();
         stickerList.add(R.drawable.man_face);
         stickerList.add(R.drawable.sunglass_sticker);
+        stickerList.add(R.drawable.chinese_long_hat_sticker);
+        stickerList.add(R.drawable.chinese_silk_hat_sticker);
         
         StickerAdapter adapter = new StickerAdapter(this, stickerList, stickerResId -> {
             // Nếu click lại sticker đang active thì tắt nó đi
@@ -1020,7 +1038,8 @@ public class MainActivity extends AppCompatActivity {
                 // Chọn sticker mới
                 currentStickerResId = stickerResId;
                 currentStickerBitmap = BitmapFactory.decodeResource(getResources(), stickerResId);
-                faceOverlayView.setSticker(currentStickerBitmap);
+                boolean isHat = isHatSticker(stickerResId);
+                faceOverlayView.setSticker(currentStickerBitmap, isHat);
                 
                 // Nếu đang xem ảnh đã chụp, vẽ lại sticker lên ảnh
                 if (capturedBitmap != null && !capturedFaceRects.isEmpty()) {

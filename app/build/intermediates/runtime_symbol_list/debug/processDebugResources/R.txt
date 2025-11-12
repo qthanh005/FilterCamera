@@ -3026,6 +3026,8 @@ int drawable btn_radio_on_mtrl 0x7f070084
 int drawable btn_radio_on_to_off_mtrl_animation 0x7f070085
 int drawable btn_round_dark 0x7f070086
 int drawable btn_switch_camera_bg 0x7f070087
+int drawable chinese_long_hat_sticker 0x7f070111
+int drawable chinese_silk_hat_sticker 0x7f070112
 int drawable common_full_open_on_phone 0x7f070088
 int drawable common_google_signin_btn_icon_dark 0x7f070089
 int drawable common_google_signin_btn_icon_dark_focused 0x7f07008a

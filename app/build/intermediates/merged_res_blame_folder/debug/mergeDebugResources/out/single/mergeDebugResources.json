@@ -8,6 +8,10 @@
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-42:\\mipmap-hdpi\\ic_launcher.webp"
     },
     {
+        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-40:\\drawable_chinese_long_hat_sticker.png.flat",
+        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-42:\\drawable\\chinese_long_hat_sticker.png"
+    },
+    {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-40:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-42:\\mipmap-xxhdpi\\ic_launcher_round.webp"
     },
@@ -60,6 +64,10 @@
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-42:\\drawable\\bottom_control_bg.xml"
     },
     {
+        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-40:\\drawable_sunglass_sticker.png.flat",
+        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-42:\\drawable\\sunglass_sticker.png"
+    },
+    {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-40:\\drawable_ic_launcher_background.xml.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-42:\\drawable\\ic_launcher_background.xml"
     },
@@ -96,8 +104,8 @@
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-42:\\mipmap-xhdpi\\ic_launcher_round.webp"
     },
     {
-        "merged": "com.example.cameraapp-debug-40:/drawable_sunglass_sticker.png.flat",
-        "source": "com.example.cameraapp-main-42:/drawable/sunglass_sticker.png"
+        "merged": "com.example.cameraapp-debug-40:/layout_activity_main.xml.flat",
+        "source": "com.example.cameraapp-main-42:/layout/activity_main.xml"
     },
     {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-40:\\anim_slide_out_bottom.xml.flat",
@@ -190,6 +198,10 @@
     {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-40:\\drawable_sticker_smile.xml.flat",
         "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-42:\\drawable\\sticker_smile.xml"
+    },
+    {
+        "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-40:\\drawable_chinese_silk_hat_sticker.png.flat",
+        "source": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-main-42:\\drawable\\chinese_silk_hat_sticker.png"
     },
     {
         "merged": "C:\\Users\\ADMIN\\.gradle\\daemon\\8.13\\com.example.cameraapp-debug-40:\\mipmap-mdpi_ic_launcher_round.webp.flat",
