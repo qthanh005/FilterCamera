@@ -16,7 +16,13 @@ public class FaceOverlayView extends View {
     private List<FaceRect> faceRects = new ArrayList<>();
     private Bitmap stickerBitmap;
     private Matrix transformMatrix;
-    private boolean isHatSticker = false;
+    private StickerType stickerType = StickerType.FACE;
+    
+    public enum StickerType {
+        FACE,   // Sticker ở mặt
+        HAT,    // Sticker ở đầu
+        NECK    // Sticker ở cổ
+    }
     
     public FaceOverlayView(Context context) {
         super(context);
@@ -28,13 +34,19 @@ public class FaceOverlayView extends View {
     
     public void setSticker(Bitmap sticker) {
         this.stickerBitmap = sticker;
-        this.isHatSticker = false; // Reset flag khi gọi phương thức cũ
+        this.stickerType = StickerType.FACE; // Reset về FACE khi gọi phương thức cũ
         invalidate();
     }
     
     public void setSticker(Bitmap sticker, boolean isHat) {
         this.stickerBitmap = sticker;
-        this.isHatSticker = isHat;
+        this.stickerType = isHat ? StickerType.HAT : StickerType.FACE;
+        invalidate();
+    }
+    
+    public void setSticker(Bitmap sticker, StickerType type) {
+        this.stickerBitmap = sticker;
+        this.stickerType = type;
         invalidate();
     }
     
@@ -76,15 +88,23 @@ public class FaceOverlayView extends View {
                 int faceHeight = Math.abs(bottom - top);
                 int stickerSize = (int) (Math.max(faceWidth, faceHeight) * 1.2f);
                 
-                // Vẽ sticker lên giữa khuôn mặt hoặc trên đầu (nếu là hat)
+                // Vẽ sticker tùy theo loại
                 int x = Math.min(left, right) + (faceWidth - stickerSize) / 2;
                 int y;
-                if (isHatSticker) {
-                    // Đặt sticker hat ở trên đầu (trên top của face, offset lên một phần)
-                    y = Math.min(top, bottom) - (int) (stickerSize * 0.6f);
-                } else {
-                    // Sticker thông thường ở giữa mặt
-                    y = Math.min(top, bottom) + (faceHeight - stickerSize) / 2;
+                switch (stickerType) {
+                    case HAT:
+                        // Đặt sticker hat ở trên đầu (trên top của face, offset lên một phần)
+                        y = Math.min(top, bottom) - (int) (stickerSize * 0.6f);
+                        break;
+                    case NECK:
+                        // Đặt sticker necklace ở cổ (dưới bottom của face, offset xuống một phần)
+                        y = Math.max(top, bottom) + (int) (faceHeight * 0.3f);
+                        break;
+                    case FACE:
+                    default:
+                        // Sticker thông thường ở giữa mặt
+                        y = Math.min(top, bottom) + (faceHeight - stickerSize) / 2;
+                        break;
                 }
                 
                 if (stickerBitmap != null && !stickerBitmap.isRecycled()) {

@@ -59,6 +59,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- TextView hint sticker -->
+    <TextView
+        android:id="@+id/tvStickerHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nhấn giữ nút chụp để chọn sticker"
+        android:textSize="15sp"
+        android:textColor="#FFFFFF"
+        android:background="#80000000"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:visibility="gone"
+        android:elevation="8dp"
+        android:alpha="0"
+        app:layout_constraintBottom_toTopOf="@+id/controlLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        android:layout_marginBottom="16dp" />
+
     <!-- RecyclerView filter -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFilters"

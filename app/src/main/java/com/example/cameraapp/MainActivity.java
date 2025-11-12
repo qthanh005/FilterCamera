@@ -457,12 +457,26 @@ public class MainActivity extends AppCompatActivity {
             int faceHeight = Math.abs(bottom - top);
             int stickerSize = (int) (Math.max(faceWidth, faceHeight) * 1.2f);
             
-            // Vị trí vẽ sticker (giữa khuôn mặt hoặc trên đầu nếu là hat)
+            // Vị trí vẽ sticker tùy theo loại
             int x = Math.min(left, right) + (faceWidth - stickerSize) / 2;
             int y;
-            if (currentStickerResId != null && isHatSticker(currentStickerResId)) {
-                // Đặt sticker hat ở trên đầu (trên top của face, offset lên một phần)
-                y = Math.min(top, bottom) - (int) (stickerSize * 0.6f);
+            if (currentStickerResId != null) {
+                FaceOverlayView.StickerType stickerType = getStickerType(currentStickerResId);
+                switch (stickerType) {
+                    case HAT:
+                        // Đặt sticker hat ở trên đầu (trên top của face, offset lên một phần)
+                        y = Math.min(top, bottom) - (int) (stickerSize * 0.6f);
+                        break;
+                    case NECK:
+                        // Đặt sticker necklace ở cổ (dưới bottom của face, offset xuống một phần)
+                        y = Math.max(top, bottom) + (int) (faceHeight * 0.3f);
+                        break;
+                    case FACE:
+                    default:
+                        // Sticker thông thường ở giữa mặt
+                        y = Math.min(top, bottom) + (faceHeight - stickerSize) / 2;
+                        break;
+                }
             } else {
                 // Sticker thông thường ở giữa mặt
                 y = Math.min(top, bottom) + (faceHeight - stickerSize) / 2;
@@ -992,6 +1006,18 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
     
+    // Xác định loại sticker
+    private FaceOverlayView.StickerType getStickerType(int resId) {
+        if (resId == R.drawable.chinese_long_hat_sticker || 
+            resId == R.drawable.chinese_silk_hat_sticker) {
+            return FaceOverlayView.StickerType.HAT;
+        } else if (resId == R.drawable.necklace_sticker) {
+            return FaceOverlayView.StickerType.NECK;
+        } else {
+            return FaceOverlayView.StickerType.FACE;
+        }
+    }
+    
     private void showStickerSelector() {
         BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
         View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_sticker, null);
@@ -1008,6 +1034,8 @@ public class MainActivity extends AppCompatActivity {
         stickerList.add(R.drawable.sunglass_sticker);
         stickerList.add(R.drawable.chinese_long_hat_sticker);
         stickerList.add(R.drawable.chinese_silk_hat_sticker);
+        stickerList.add(R.drawable.dog_sticker);
+        stickerList.add(R.drawable.necklace_sticker);
         
         StickerAdapter adapter = new StickerAdapter(this, stickerList, stickerResId -> {
             // Nếu click lại sticker đang active thì tắt nó đi
@@ -1038,8 +1066,8 @@ public class MainActivity extends AppCompatActivity {
                 // Chọn sticker mới
                 currentStickerResId = stickerResId;
                 currentStickerBitmap = BitmapFactory.decodeResource(getResources(), stickerResId);
-                boolean isHat = isHatSticker(stickerResId);
-                faceOverlayView.setSticker(currentStickerBitmap, isHat);
+                FaceOverlayView.StickerType stickerType = getStickerType(stickerResId);
+                faceOverlayView.setSticker(currentStickerBitmap, stickerType);
                 
                 // Nếu đang xem ảnh đã chụp, vẽ lại sticker lên ảnh
                 if (capturedBitmap != null && !capturedFaceRects.isEmpty()) {
