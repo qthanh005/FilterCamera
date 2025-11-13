@@ -27,6 +27,12 @@ public class IntroActivity extends AppCompatActivity {
         dot1 = findViewById(R.id.dot1);
         dot2 = findViewById(R.id.dot2);
         
+        // Đảm bảo background được áp dụng đúng (override Material theme)
+        btnNext.setBackgroundResource(R.drawable.btn_intro_next);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            btnNext.setBackgroundTintList(null);
+        }
+        
         adapter = new IntroPagerAdapter(this);
         viewPager.setAdapter(adapter);
         

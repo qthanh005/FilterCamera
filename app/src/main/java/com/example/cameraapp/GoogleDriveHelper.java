@@ -107,14 +107,48 @@ public class GoogleDriveHelper {
             throw ioException;
         } catch (com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
             Log.e(TAG, "Google API Error: " + e.getStatusCode() + " - " + e.getMessage());
+            Log.e(TAG, "Error details: " + e.getDetails());
+            if (e.getDetails() != null) {
+                Log.e(TAG, "Error message: " + e.getDetails().getMessage());
+                Log.e(TAG, "Error code: " + e.getDetails().getCode());
+            }
+            
             if (e.getStatusCode() == 401) {
                 throw new IOException("Authentication failed. Please sign in again.", e);
             } else if (e.getStatusCode() == 403) {
-                throw new IOException("Permission denied. Please check Google Drive permissions.", e);
+                String errorMsg = "Permission denied. ";
+                if (e.getDetails() != null && e.getDetails().getMessage() != null) {
+                    String detailMsg = e.getDetails().getMessage();
+                    if (detailMsg.contains("access_denied") || detailMsg.contains("Access blocked")) {
+                        errorMsg += "Email này chưa được thêm vào Test Users trong Google Cloud Console. ";
+                        errorMsg += "Vui lòng thêm email vào OAuth consent screen > Test users.";
+                    } else if (detailMsg.contains("insufficient permissions")) {
+                        errorMsg += "Không đủ quyền truy cập Google Drive. ";
+                        errorMsg += "Vui lòng kiểm tra OAuth scopes và permissions.";
+                    } else {
+                        errorMsg += detailMsg;
+                    }
+                } else {
+                    errorMsg += "Please check Google Drive permissions.";
+                }
+                throw new IOException(errorMsg, e);
+            } else if (e.getStatusCode() == 400) {
+                String errorMsg = "Bad request. ";
+                if (e.getDetails() != null && e.getDetails().getMessage() != null) {
+                    errorMsg += e.getDetails().getMessage();
+                }
+                throw new IOException(errorMsg, e);
             }
-            throw new IOException("Google Drive API error: " + e.getMessage(), e);
+            throw new IOException("Google Drive API error (" + e.getStatusCode() + "): " + 
+                    (e.getDetails() != null && e.getDetails().getMessage() != null ? 
+                     e.getDetails().getMessage() : e.getMessage()), e);
         } catch (Exception e) {
             Log.e(TAG, "Error uploading image", e);
+            Log.e(TAG, "Exception type: " + e.getClass().getName());
+            Log.e(TAG, "Exception message: " + e.getMessage());
+            if (e.getCause() != null) {
+                Log.e(TAG, "Cause: " + e.getCause().getMessage());
+            }
             throw new IOException("Failed to upload image: " + e.getMessage(), e);
         }
     }

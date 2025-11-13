@@ -1401,6 +1401,8 @@ int color common_google_signin_btn_text_light_disabled 0x7f050037
 int color common_google_signin_btn_text_light_focused 0x7f050038
 int color common_google_signin_btn_text_light_pressed 0x7f050039
 int color common_google_signin_btn_tint 0x7f05003a
+int color countdown_bg_end 0x7f050312
+int color countdown_bg_start 0x7f050313
 int color design_bottom_navigation_shadow_color 0x7f05003b
 int color design_box_stroke_color 0x7f05003c
 int color design_dark_default_color_background 0x7f05003d
@@ -2119,12 +2121,16 @@ int color secondary_text_default_material_dark 0x7f050305
 int color secondary_text_default_material_light 0x7f050306
 int color secondary_text_disabled_material_dark 0x7f050307
 int color secondary_text_disabled_material_light 0x7f050308
+int color switch_thumb 0x7f050314
 int color switch_thumb_disabled_material_dark 0x7f050309
 int color switch_thumb_disabled_material_light 0x7f05030a
 int color switch_thumb_material_dark 0x7f05030b
 int color switch_thumb_material_light 0x7f05030c
 int color switch_thumb_normal_material_dark 0x7f05030d
 int color switch_thumb_normal_material_light 0x7f05030e
+int color switch_track 0x7f050315
+int color switch_track_checked 0x7f050316
+int color switch_track_unchecked 0x7f050317
 int color tooltip_background_dark 0x7f05030f
 int color tooltip_background_light 0x7f050310
 int color white 0x7f050311
@@ -3050,6 +3056,8 @@ int drawable common_google_signin_btn_text_light 0x7f070097
 int drawable common_google_signin_btn_text_light_focused 0x7f070098
 int drawable common_google_signin_btn_text_light_normal 0x7f070099
 int drawable common_google_signin_btn_text_light_normal_background 0x7f07009a
+int drawable countdown_bg 0x7f070124
+int drawable countdown_bg_ripple 0x7f070125
 int drawable default_preview 0x7f07009b
 int drawable design_fab_background 0x7f07009c
 int drawable design_ic_visibility 0x7f07009d
@@ -3076,6 +3084,8 @@ int drawable ic_clear_black_24 0x7f0700ad
 int drawable ic_clock_black_24dp 0x7f0700ae
 int drawable ic_filter 0x7f0700af
 int drawable ic_gallery 0x7f0700b0
+int drawable ic_google_drive 0x7f07011d
+int drawable ic_grid 0x7f07011e
 int drawable ic_keyboard_black_24dp 0x7f0700b1
 int drawable ic_launcher_background 0x7f0700b2
 int drawable ic_launcher_foreground 0x7f0700b3
@@ -3088,6 +3098,7 @@ int drawable ic_mtrl_chip_checked_circle 0x7f0700b9
 int drawable ic_mtrl_chip_close_circle 0x7f0700ba
 int drawable ic_search_black_24 0x7f0700bb
 int drawable ic_switch_camera 0x7f0700bc
+int drawable ic_timer 0x7f070121
 int drawable indeterminate_static 0x7f0700bd
 int drawable m3_avd_hide_password 0x7f0700be
 int drawable m3_avd_show_password 0x7f0700bf
@@ -3270,9 +3281,12 @@ int id bounceEnd 0x7f080062
 int id bounceStart 0x7f080063
 int id btnBackToCamera 0x7f080064
 int id btnCapture 0x7f080065
+int id btnCloseMenu 0x7f080240
 int id btnCloseSticker 0x7f080213
 int id btnFilter 0x7f080067
 int id btnGallery 0x7f080068
+int id btnGoogleDrive 0x7f080228
+int id btnGrid 0x7f08022c
 int id btnNext 0x7f08021c
 int id btnSave 0x7f080069
 int id btnSkip 0x7f08021d
@@ -3282,6 +3296,8 @@ int id buttonPanel 0x7f08006b
 int id cache_measures 0x7f08006c
 int id callMeasure 0x7f08006d
 int id cancel_button 0x7f08006e
+int id cardCountdown 0x7f080241
+int id cardGrid 0x7f080242
 int id carryVelocity 0x7f08006f
 int id center 0x7f080070
 int id centerCrop 0x7f080071
@@ -3313,6 +3329,8 @@ int id continuousVelocity 0x7f08008a
 int id controlLayout 0x7f08008b
 int id coordinator 0x7f08008c
 int id cos 0x7f08008d
+int id countdownBg 0x7f080243
+int id countdownContainer 0x7f08023b
 int id counterclockwise 0x7f08008e
 int id cradle 0x7f08008f
 int id currentState 0x7f080090
@@ -3351,6 +3369,7 @@ int id dragLeft 0x7f0800ad
 int id dragRight 0x7f0800ae
 int id dragStart 0x7f0800af
 int id dragUp 0x7f0800b0
+int id driveStatusIndicator 0x7f080229
 int id dropdown_menu 0x7f0800b1
 int id easeIn 0x7f0800b2
 int id easeInOut 0x7f0800b3
@@ -3396,6 +3415,7 @@ int id glide_custom_view_target_tag 0x7f0800d9
 int id gone 0x7f0800da
 int id graph 0x7f0800db
 int id graph_wrap 0x7f0800dc
+int id gridOverlayView 0x7f08022f
 int id group_divider 0x7f0800dd
 int id grouping 0x7f0800de
 int id groups 0x7f0800df
@@ -3425,6 +3445,8 @@ int id invisible 0x7f0800f5
 int id inward 0x7f0800f6
 int id italic 0x7f0800f7
 int id item_touch_helper_previous_elevation 0x7f0800f8
+int id ivCountdownIcon 0x7f080244
+int id ivGridIcon 0x7f080245
 int id jumpToEnd 0x7f0800f9
 int id jumpToStart 0x7f0800fa
 int id labeled 0x7f0800fb
@@ -3465,6 +3487,8 @@ int id material_timepicker_ok_button 0x7f08011d
 int id material_timepicker_view 0x7f08011e
 int id material_value_index 0x7f08011f
 int id matrix 0x7f080120
+int id menu_countdown 0x7f08023e
+int id menu_grid 0x7f08023f
 int id message 0x7f080121
 int id middle 0x7f080122
 int id mini 0x7f080123
@@ -3565,6 +3589,7 @@ int id right 0x7f080181
 int id rightToLeft 0x7f080182
 int id right_icon 0x7f080183
 int id right_side 0x7f080184
+int id rippleCircle 0x7f080246
 int id rounded 0x7f080185
 int id row_index_key 0x7f080186
 int id rvFilters 0x7f080187
@@ -3630,6 +3655,8 @@ int id stretch 0x7f0801c2
 int id submenuarrow 0x7f0801c3
 int id submit_area 0x7f0801c4
 int id supportScrollUp 0x7f0801c5
+int id switchCountdown 0x7f080236
+int id switchGrid 0x7f080237
 int id tabMode 0x7f0801c6
 int id tag_accessibility_actions 0x7f0801c7
 int id tag_accessibility_clickable_spans 0x7f0801c8
@@ -3679,10 +3706,15 @@ int id transition_position 0x7f0801f3
 int id transition_scene_layoutid_cache 0x7f0801f4
 int id transition_transform 0x7f0801f5
 int id triangle 0x7f0801f6
+int id tvCountdown 0x7f08022a
+int id tvCountdownSubtitle 0x7f080247
+int id tvCountdownTitle 0x7f080248
 int id tvDescription 0x7f080222
 int id tvFilterName 0x7f0801f7
+int id tvGridSubtitle 0x7f080249
+int id tvGridTitle 0x7f08024a
+int id tvMenuTitle 0x7f08024b
 int id tvPermissionStatus 0x7f0801f9
-int id tvStickerHint 0x7f080227
 int id tvStickerTitle 0x7f0801fa
 int id tvTitle 0x7f080223
 int id unchecked 0x7f0801fb
@@ -3827,6 +3859,7 @@ int layout abc_select_dialog_material 0x7f0b001a
 int layout abc_tooltip 0x7f0b001b
 int layout activity_intro 0x7f0b0070
 int layout activity_main 0x7f0b001c
+int layout bottom_sheet_grid_menu 0x7f0b0074
 int layout bottom_sheet_sticker 0x7f0b006f
 int layout custom_dialog 0x7f0b001e
 int layout design_bottom_navigation_item 0x7f0b001f
@@ -3911,6 +3944,7 @@ int layout select_dialog_item_material 0x7f0b006b
 int layout select_dialog_multichoice_material 0x7f0b006c
 int layout select_dialog_singlechoice_material 0x7f0b006d
 int layout support_simple_spinner_dropdown_item 0x7f0b006e
+int menu grid_menu 0x7f130000
 int mipmap ic_launcher 0x7f0d0000
 int mipmap ic_launcher_round 0x7f0d0001
 int plurals mtrl_badge_content_description 0x7f0e0000
@@ -4391,6 +4425,7 @@ int style CardView 0x7f100120
 int style CardView_Dark 0x7f100121
 int style CardView_Light 0x7f100122
 int style CircleImage 0x7f100123
+int style IntroButtonStyle 0x7f100469
 int style MaterialAlertDialog_Material3 0x7f100124
 int style MaterialAlertDialog_Material3_Animation 0x7f100125
 int style MaterialAlertDialog_Material3_Body_Text 0x7f100126

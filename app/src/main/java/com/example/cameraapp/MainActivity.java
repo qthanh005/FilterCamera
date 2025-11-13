@@ -15,6 +15,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.cardview.widget.CardView;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -70,15 +72,40 @@ public class MainActivity extends AppCompatActivity {
     private PreviewView previewView;
     private ImageCapture imageCapture;
     private ExecutorService cameraExecutor;
+    private ProcessCameraProvider cameraProvider;
+    private int currentCameraFacing = CameraSelector.LENS_FACING_BACK; // Mặc định camera sau
 
-    private ImageButton btnCapture, btnFilter, btnBack, btnSave, btnGallery, btnSwitchCamera;
+    private ImageButton btnCapture, btnFilter, btnBack, btnSave, btnGallery, btnSwitchCamera, btnGoogleDrive, btnGrid;
     private ImageView imageView;
-    private TextView tvPermissionStatus;
+    private TextView tvPermissionStatus, tvCountdown;
     private RecyclerView rvFilters;
     private FaceOverlayView faceOverlayView;
+    private GridOverlayView gridOverlayView;
+    private View driveStatusIndicator;
+    private View countdownContainer, countdownBg, rippleCircle;
+    
+    // Countdown timer
+    private android.os.CountDownTimer countDownTimer;
+    private boolean isCountdownMode = false; // Trạng thái bật/tắt countdown mode
+    private boolean isCountdownRunning = false; // Đang chạy countdown
 
     private Bitmap capturedBitmap = null;
     private Bitmap appliedBitmap = null;
+    
+    // Helper method để giải phóng bitmap an toàn
+    private void recycleBitmap(Bitmap bitmap) {
+        if (bitmap != null && !bitmap.isRecycled()) {
+            bitmap.recycle();
+        }
+    }
+    
+    // Helper method để kiểm tra và lấy bitmap an toàn
+    private Bitmap getSafeBitmap(Bitmap bitmap) {
+        if (bitmap != null && !bitmap.isRecycled()) {
+            return bitmap;
+        }
+        return null;
+    }
     
     // Face Detection
     private FaceDetector faceDetector;
@@ -92,9 +119,11 @@ public class MainActivity extends AppCompatActivity {
     // Google Drive
     private static final int REQUEST_GOOGLE_SIGN_IN = 1001;
     private static final int REQUEST_AUTHORIZE = 1002;
+    private static final int REQUEST_PICK_IMAGE = 1003;
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private GoogleDriveHelper driveHelper;
     private Bitmap pendingSyncBitmap = null; // Lưu bitmap đang chờ sync khi cần auth
+    private android.app.ProgressDialog uploadProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,10 +138,18 @@ public class MainActivity extends AppCompatActivity {
         btnSave = findViewById(R.id.btnSave);
         btnGallery = findViewById(R.id.btnGallery);
         btnSwitchCamera = findViewById(R.id.btnSwitchCamera);
+        btnGoogleDrive = findViewById(R.id.btnGoogleDrive);
+        btnGrid = findViewById(R.id.btnGrid);
         imageView = findViewById(R.id.imageView);
         tvPermissionStatus = findViewById(R.id.tvPermissionStatus);
+        tvCountdown = findViewById(R.id.tvCountdown);
+        countdownContainer = findViewById(R.id.countdownContainer);
+        countdownBg = findViewById(R.id.countdownBg);
+        rippleCircle = findViewById(R.id.rippleCircle);
         rvFilters = findViewById(R.id.rvFilters);
         faceOverlayView = findViewById(R.id.faceOverlayView);
+        gridOverlayView = findViewById(R.id.gridOverlayView);
+        driveStatusIndicator = findViewById(R.id.driveStatusIndicator);
 
         cameraExecutor = Executors.newSingleThreadExecutor();
         
@@ -138,29 +175,43 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+        
+        // Cập nhật trạng thái nút Google Drive (sẽ được gọi lại sau khi init views)
 
         updateCameraState();
         loadLatestGalleryImage();
 
         // Các sự kiện click với animation nhẹ
         btnCapture.setOnClickListener(v -> {
-            Animation clickAnim = AnimationUtils.loadAnimation(this, R.anim.button_click_light);
-            v.startAnimation(clickAnim);
-            capturePhoto();
+            // Nếu đang chạy countdown, không làm gì
+            if (isCountdownRunning) {
+                return;
+            }
+            
+            // Nếu countdown mode được bật, bắt đầu countdown
+            if (isCountdownMode) {
+                startCountdown();
+            } else {
+                // Chụp ngay lập tức
+                Animation clickAnim = AnimationUtils.loadAnimation(this, R.anim.button_click_light);
+                v.startAnimation(clickAnim);
+                capturePhoto();
+            }
         });
         btnBack.setOnClickListener(v -> backToCamera());
         btnFilter.setOnClickListener(v -> {
-            if (capturedBitmap != null) {
+            if (getSafeBitmap(capturedBitmap) != null) {
                 Animation clickAnim = AnimationUtils.loadAnimation(this, R.anim.button_click_light);
                 v.startAnimation(clickAnim);
                 toggleFilterRecyclerView();
             }
         });
         btnSave.setOnClickListener(v -> {
-            if (appliedBitmap != null) {
+            Bitmap safeBitmap = getSafeBitmap(appliedBitmap);
+            if (safeBitmap != null) {
                 Animation clickAnim = AnimationUtils.loadAnimation(this, R.anim.button_click_light);
                 v.startAnimation(clickAnim);
-                boolean ok = saveBitmapToGallery(appliedBitmap);
+                boolean ok = saveBitmapToGallery(safeBitmap);
                 Toast.makeText(MainActivity.this, ok ? "Ảnh đã lưu!" : "Lưu ảnh thất bại", Toast.LENGTH_SHORT).show();
                 if (ok) {
                     // Tự động đồng bộ lên Google Drive sau khi lưu thành công
@@ -169,13 +220,56 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        btnGallery.setOnClickListener(v -> openGalleryApp());
+        btnGallery.setOnClickListener(v -> pickImageFromGallery());
+        
+        // Nút đổi camera (Front/Back)
+        btnSwitchCamera.setOnClickListener(v -> {
+            switchCamera();
+        });
+        
+        // Nút Grid - hiển thị dropdown menu với Grid và Countdown
+        btnGrid.setOnClickListener(v -> showGridMenu(v));
         
         // Long press vào btnCapture để mở sticker selector
         btnCapture.setOnLongClickListener(v -> {
             showStickerSelector();
             return true;
         });
+        
+        // Nút Google Drive - đăng nhập/đăng xuất
+        btnGoogleDrive.setOnClickListener(v -> {
+            if (driveHelper == null) {
+                // Chưa đăng nhập, mở dialog đăng nhập
+                new AlertDialog.Builder(this)
+                        .setTitle("Đăng nhập Google Drive")
+                        .setMessage("Đăng nhập để đồng bộ ảnh lên Google Drive.\n\nẢnh sẽ được lưu vào thư mục 'FilterCamera' trên Drive của bạn.")
+                        .setPositiveButton("Đăng nhập", (dialog, which) -> signInToGoogle())
+                        .setNegativeButton("Hủy", null)
+                        .show();
+            } else {
+                // Đã đăng nhập, hiển thị thông tin
+                String currentAccountName = getSharedPreferences("camera_prefs", MODE_PRIVATE)
+                        .getString(PREF_ACCOUNT_NAME, "Unknown");
+                new AlertDialog.Builder(this)
+                        .setTitle("Google Drive")
+                        .setMessage("Đã đăng nhập với: " + currentAccountName + "\n\nẢnh sẽ tự động đồng bộ lên Drive khi bạn lưu.")
+                        .setPositiveButton("Đăng xuất", (dialog, which) -> {
+                            // Đăng xuất
+                            getSharedPreferences("camera_prefs", MODE_PRIVATE)
+                                    .edit()
+                                    .remove(PREF_ACCOUNT_NAME)
+                                    .apply();
+                            driveHelper = null;
+                            Toast.makeText(this, "Đã đăng xuất Google Drive", Toast.LENGTH_SHORT).show();
+                            updateGoogleDriveButton();
+                        })
+                        .setNegativeButton("OK", null)
+                        .show();
+            }
+        });
+        
+        // Cập nhật trạng thái nút Google Drive
+        updateGoogleDriveButton();
     }
 
     // Kiểm tra quyền camera
@@ -207,6 +301,12 @@ public class MainActivity extends AppCompatActivity {
 
     // Cập nhật trạng thái camera
     private void updateCameraState() {
+        // Kiểm tra xem có đang ở chế độ xem ảnh không (imageView đang visible)
+        // Nếu đang xem ảnh thì không khởi động lại camera
+        if (imageView != null && imageView.getVisibility() == ImageView.VISIBLE) {
+            return;
+        }
+        
         new android.os.Handler().postDelayed(() -> {
             if (hasCameraPermission()) {
                 tvPermissionStatus.setVisibility(TextView.GONE);
@@ -251,27 +351,70 @@ public class MainActivity extends AppCompatActivity {
 
         cameraProviderFuture.addListener(() -> {
             try {
-                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                Preview preview = new Preview.Builder().build();
-                imageCapture = new ImageCapture.Builder().build();
-                CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-                preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
-                // ImageAnalysis để detect faces
-                ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .build();
-                
-                imageAnalysis.setAnalyzer(cameraExecutor, imageProxy -> {
-                    processImageProxy(imageProxy);
-                });
-
-                cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalysis);
+                cameraProvider = cameraProviderFuture.get();
+                bindCameraUseCases();
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(this));
+    }
+    
+    // Bind camera use cases với camera selector hiện tại
+    private void bindCameraUseCases() {
+        if (cameraProvider == null) return;
+        
+        try {
+            // Unbind tất cả use cases trước
+            cameraProvider.unbindAll();
+            
+            // Tạo camera selector dựa trên currentCameraFacing
+            CameraSelector cameraSelector;
+            if (currentCameraFacing == CameraSelector.LENS_FACING_FRONT) {
+                cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA;
+            } else {
+                cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
+            }
+            
+            Preview preview = new Preview.Builder().build();
+            preview.setSurfaceProvider(previewView.getSurfaceProvider());
+            
+            imageCapture = new ImageCapture.Builder()
+                    .setTargetRotation(previewView.getDisplay().getRotation())
+                    .build();
+            
+            // ImageAnalysis để detect faces
+            ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build();
+            
+            imageAnalysis.setAnalyzer(cameraExecutor, imageProxy -> {
+                processImageProxy(imageProxy);
+            });
+            
+            // Bind tất cả use cases
+            cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalysis);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi khởi động camera: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    // Đổi camera (Front/Back)
+    private void switchCamera() {
+        if (cameraProvider == null) {
+            startCamera();
+            return;
+        }
+        
+        // Đổi camera facing
+        if (currentCameraFacing == CameraSelector.LENS_FACING_BACK) {
+            currentCameraFacing = CameraSelector.LENS_FACING_FRONT;
+        } else {
+            currentCameraFacing = CameraSelector.LENS_FACING_BACK;
+        }
+        
+        // Bind lại với camera mới
+        bindCameraUseCases();
     }
     
     private void processImageProxy(ImageProxy imageProxy) {
@@ -279,7 +422,8 @@ public class MainActivity extends AppCompatActivity {
         lastImageWidth = imageProxy.getWidth();
         lastImageHeight = imageProxy.getHeight();
         
-        if (currentStickerBitmap == null) {
+        Bitmap safeSticker = getSafeBitmap(currentStickerBitmap);
+        if (safeSticker == null) {
             imageProxy.close();
             return;
         }
@@ -346,6 +490,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void capturePhoto() {
         if (imageCapture == null) return;
+        
+        // Nếu đang chạy countdown, không cho chụp
+        if (isCountdownRunning) return;
 
         try {
             File tempFile = new File(getCacheDir(), "capture_" + System.currentTimeMillis() + ".jpg");
@@ -371,6 +518,234 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Lỗi khi chụp: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
+    
+    // Hiển thị menu dropdown cho nút Grid với BottomSheetDialog đẹp hơn
+    private void showGridMenu(View anchor) {
+        BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
+        View sheetView = getLayoutInflater().inflate(R.layout.bottom_sheet_grid_menu, null);
+        bottomSheet.setContentView(sheetView);
+        
+        // Lấy các views
+        CardView cardGrid = sheetView.findViewById(R.id.cardGrid);
+        CardView cardCountdown = sheetView.findViewById(R.id.cardCountdown);
+        SwitchMaterial switchGrid = sheetView.findViewById(R.id.switchGrid);
+        SwitchMaterial switchCountdown = sheetView.findViewById(R.id.switchCountdown);
+        ImageButton btnCloseMenu = sheetView.findViewById(R.id.btnCloseMenu);
+        
+        // Cập nhật trạng thái ban đầu
+        boolean isGridVisible = gridOverlayView.isGridVisible();
+        switchGrid.setChecked(isGridVisible);
+        switchCountdown.setChecked(isCountdownMode);
+        
+        // Nút đóng
+        btnCloseMenu.setOnClickListener(v -> bottomSheet.dismiss());
+        
+        // Grid toggle
+        cardGrid.setOnClickListener(v -> {
+            boolean newGridState = !isGridVisible;
+            switchGrid.setChecked(newGridState);
+            gridOverlayView.setShowGrid(newGridState);
+            btnGrid.setAlpha(newGridState ? 1.0f : 0.6f);
+            
+            // Animation feedback
+            cardGrid.animate()
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(100)
+                    .withEndAction(() -> cardGrid.animate()
+                            .scaleX(1.0f)
+                            .scaleY(1.0f)
+                            .setDuration(100)
+                            .start())
+                    .start();
+        });
+        
+        // Countdown toggle
+        cardCountdown.setOnClickListener(v -> {
+            isCountdownMode = !isCountdownMode;
+            switchCountdown.setChecked(isCountdownMode);
+            
+            // Nếu đang chạy countdown, dừng lại
+            if (isCountdownRunning) {
+                stopCountdown();
+            }
+            
+            // Animation feedback
+            cardCountdown.animate()
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(100)
+                    .withEndAction(() -> cardCountdown.animate()
+                            .scaleX(1.0f)
+                            .scaleY(1.0f)
+                            .setDuration(100)
+                            .start())
+                    .start();
+            
+            Toast.makeText(this, isCountdownMode ? "Đã bật Countdown" : "Đã tắt Countdown", Toast.LENGTH_SHORT).show();
+        });
+        
+        // Switch listeners (backup)
+        switchGrid.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            gridOverlayView.setShowGrid(isChecked);
+            btnGrid.setAlpha(isChecked ? 1.0f : 0.6f);
+        });
+        
+        switchCountdown.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isCountdownMode = isChecked;
+            if (isCountdownRunning) {
+                stopCountdown();
+            }
+        });
+        
+        bottomSheet.show();
+    }
+    
+    // Bắt đầu countdown timer với animation đẹp hơn
+    private void startCountdown() {
+        if (isCountdownRunning || imageCapture == null) return;
+        
+        isCountdownRunning = true;
+        countdownContainer.setVisibility(View.VISIBLE);
+        countdownContainer.setAlpha(0f);
+        countdownContainer.setScaleX(0.5f);
+        countdownContainer.setScaleY(0.5f);
+        
+        // Animation xuất hiện
+        countdownContainer.animate()
+                .alpha(1.0f)
+                .scaleX(1.0f)
+                .scaleY(1.0f)
+                .setDuration(300)
+                .setInterpolator(new android.view.animation.OvershootInterpolator())
+                .start();
+        
+        countDownTimer = new android.os.CountDownTimer(3000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                int seconds = (int) (millisUntilFinished / 1000);
+                tvCountdown.setText(String.valueOf(seconds));
+                
+                // Animation scale với bounce effect
+                tvCountdown.setScaleX(0.3f);
+                tvCountdown.setScaleY(0.3f);
+                tvCountdown.setAlpha(0.5f);
+                
+                tvCountdown.animate()
+                        .scaleX(1.0f)
+                        .scaleY(1.0f)
+                        .alpha(1.0f)
+                        .setDuration(300)
+                        .setInterpolator(new android.view.animation.OvershootInterpolator(1.5f))
+                        .start();
+                
+                // Ripple effect
+                rippleCircle.setScaleX(0.5f);
+                rippleCircle.setScaleY(0.5f);
+                rippleCircle.setAlpha(0.6f);
+                rippleCircle.setVisibility(View.VISIBLE);
+                
+                rippleCircle.animate()
+                        .scaleX(1.5f)
+                        .scaleY(1.5f)
+                        .alpha(0f)
+                        .setDuration(600)
+                        .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                        .withEndAction(() -> {
+                            rippleCircle.setScaleX(0.5f);
+                            rippleCircle.setScaleY(0.5f);
+                            rippleCircle.setAlpha(0f);
+                            rippleCircle.setVisibility(View.GONE);
+                        })
+                        .start();
+                
+                // Pulse background
+                countdownBg.animate()
+                        .scaleX(1.1f)
+                        .scaleY(1.1f)
+                        .setDuration(200)
+                        .withEndAction(() -> countdownBg.animate()
+                                .scaleX(1.0f)
+                                .scaleY(1.0f)
+                                .setDuration(200)
+                                .start())
+                        .start();
+            }
+            
+            @Override
+            public void onFinish() {
+                tvCountdown.setText("0");
+                
+                // Final animation với flash effect
+                countdownContainer.animate()
+                        .scaleX(1.3f)
+                        .scaleY(1.3f)
+                        .alpha(0f)
+                        .setDuration(300)
+                        .setInterpolator(new android.view.animation.AccelerateInterpolator())
+                        .withEndAction(() -> {
+                            countdownContainer.setVisibility(View.GONE);
+                            countdownContainer.setAlpha(1.0f);
+                            countdownContainer.setScaleX(1.0f);
+                            countdownContainer.setScaleY(1.0f);
+                            tvCountdown.setAlpha(1.0f);
+                            tvCountdown.setScaleX(1.0f);
+                            tvCountdown.setScaleY(1.0f);
+                            countdownBg.setScaleX(1.0f);
+                            countdownBg.setScaleY(1.0f);
+                            isCountdownRunning = false;
+                            
+                            // Tự động chụp ảnh sau khi countdown kết thúc
+                            capturePhoto();
+                        })
+                        .start();
+            }
+        };
+        
+        countDownTimer.start();
+    }
+    
+    // Dừng countdown timer
+    private void stopCountdown() {
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+            countDownTimer = null;
+        }
+        isCountdownRunning = false;
+        
+        // Animation ẩn đi
+        if (countdownContainer.getVisibility() == View.VISIBLE) {
+            countdownContainer.animate()
+                    .alpha(0f)
+                    .scaleX(0.5f)
+                    .scaleY(0.5f)
+                    .setDuration(200)
+                    .withEndAction(() -> {
+                        countdownContainer.setVisibility(View.GONE);
+                        countdownContainer.setAlpha(1.0f);
+                        countdownContainer.setScaleX(1.0f);
+                        countdownContainer.setScaleY(1.0f);
+                        tvCountdown.setAlpha(1.0f);
+                        tvCountdown.setScaleX(1.0f);
+                        tvCountdown.setScaleY(1.0f);
+                        countdownBg.setScaleX(1.0f);
+                        countdownBg.setScaleY(1.0f);
+                        rippleCircle.setVisibility(View.GONE);
+                        rippleCircle.setAlpha(0f);
+                        rippleCircle.setScaleX(0.5f);
+                        rippleCircle.setScaleY(0.5f);
+                    })
+                    .start();
+        } else {
+            countdownContainer.setVisibility(View.GONE);
+            tvCountdown.setAlpha(1.0f);
+            tvCountdown.setScaleX(1.0f);
+            tvCountdown.setScaleY(1.0f);
+            countdownBg.setScaleX(1.0f);
+            countdownBg.setScaleY(1.0f);
+            rippleCircle.setVisibility(View.GONE);
+        }
+    }
 
     private void showCapturedImage(Uri uri) {
         previewView.setVisibility(PreviewView.GONE);
@@ -378,15 +753,53 @@ public class MainActivity extends AppCompatActivity {
         btnFilter.setVisibility(ImageButton.VISIBLE);
         btnBack.setVisibility(ImageButton.VISIBLE);
         btnSave.setVisibility(ImageButton.VISIBLE);
-        // Ẩn gallery và switch camera ở chế độ xem ảnh đã chụp
+        // Ẩn gallery, switch camera và grid ở chế độ xem ảnh đã chụp
         btnGallery.setVisibility(ImageButton.GONE);
         btnSwitchCamera.setVisibility(ImageButton.GONE);
+        btnGrid.setVisibility(ImageButton.GONE);
         imageView.setVisibility(ImageView.VISIBLE);
 
+        // Giải phóng bitmap cũ trước khi gán bitmap mới
+        recycleBitmap(capturedBitmap);
+        recycleBitmap(appliedBitmap);
+        
         capturedBitmap = getCorrectBitmap(uri);
         
         // Nếu có sticker được chọn, detect faces lại trên bitmap đã chụp và vẽ sticker
-        if (capturedBitmap != null && currentStickerBitmap != null) {
+        Bitmap safeSticker = getSafeBitmap(currentStickerBitmap);
+        if (capturedBitmap != null && safeSticker != null) {
+            detectFacesAndDrawSticker(capturedBitmap);
+        } else {
+            appliedBitmap = capturedBitmap;
+            Glide.with(this).load(appliedBitmap != null ? appliedBitmap : uri).into(imageView);
+            setupFilterRecyclerView();
+        }
+        
+        stopCamera();
+    }
+    
+    // Hiển thị ảnh đã chọn từ gallery để chỉnh sửa
+    private void showSelectedImage(Uri uri) {
+        previewView.setVisibility(PreviewView.GONE);
+        btnCapture.setVisibility(ImageButton.GONE);
+        btnFilter.setVisibility(ImageButton.VISIBLE);
+        btnBack.setVisibility(ImageButton.VISIBLE);
+        btnSave.setVisibility(ImageButton.VISIBLE);
+        // Ẩn gallery, switch camera và grid ở chế độ xem ảnh đã chọn
+        btnGallery.setVisibility(ImageButton.GONE);
+        btnSwitchCamera.setVisibility(ImageButton.GONE);
+        btnGrid.setVisibility(ImageButton.GONE);
+        imageView.setVisibility(ImageView.VISIBLE);
+
+        // Giải phóng bitmap cũ trước khi gán bitmap mới
+        recycleBitmap(capturedBitmap);
+        recycleBitmap(appliedBitmap);
+        
+        capturedBitmap = getCorrectBitmap(uri);
+        
+        // Nếu có sticker được chọn, detect faces lại trên bitmap đã chọn và vẽ sticker
+        Bitmap safeSticker = getSafeBitmap(currentStickerBitmap);
+        if (capturedBitmap != null && safeSticker != null) {
             detectFacesAndDrawSticker(capturedBitmap);
         } else {
             appliedBitmap = capturedBitmap;
@@ -398,8 +811,15 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void detectFacesAndDrawSticker(Bitmap bitmap) {
+        // Kiểm tra bitmap an toàn
+        Bitmap safeBitmap = getSafeBitmap(bitmap);
+        if (safeBitmap == null) {
+            appliedBitmap = null;
+            return;
+        }
+        
         // Detect faces lại trên bitmap đã chụp để đảm bảo chính xác
-        InputImage image = InputImage.fromBitmap(bitmap, 0);
+        InputImage image = InputImage.fromBitmap(safeBitmap, 0);
         
         faceDetector.process(image)
                 .addOnSuccessListener(faces -> {
@@ -410,10 +830,11 @@ public class MainActivity extends AppCompatActivity {
                         capturedFaceRects.add(face.getBoundingBox()); // Lưu lại để dùng sau
                     }
                     
-                    if (!faceRects.isEmpty() && currentStickerBitmap != null) {
-                        appliedBitmap = drawStickerOnBitmap(bitmap, faceRects);
+                    Bitmap safeSticker = getSafeBitmap(currentStickerBitmap);
+                    if (!faceRects.isEmpty() && safeSticker != null) {
+                        appliedBitmap = drawStickerOnBitmap(safeBitmap, faceRects);
                     } else {
-                        appliedBitmap = bitmap;
+                        appliedBitmap = safeBitmap;
                     }
                     
                     Glide.with(this).load(appliedBitmap).into(imageView);
@@ -422,28 +843,32 @@ public class MainActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     android.util.Log.e("MainActivity", "Face detection on captured image failed", e);
                     capturedFaceRects.clear();
-                    appliedBitmap = bitmap;
+                    // Sử dụng safeBitmap đã được định nghĩa ở đầu method
+                    appliedBitmap = safeBitmap;
                     Glide.with(this).load(appliedBitmap).into(imageView);
                     setupFilterRecyclerView();
                 });
     }
     
     private Bitmap drawStickerOnBitmap(Bitmap originalBitmap, List<android.graphics.Rect> faceRects) {
-        if (originalBitmap == null || currentStickerBitmap == null || faceRects == null || faceRects.isEmpty()) {
-            return originalBitmap;
+        Bitmap safeOriginal = getSafeBitmap(originalBitmap);
+        Bitmap safeSticker = getSafeBitmap(currentStickerBitmap);
+        
+        if (safeOriginal == null || safeSticker == null || faceRects == null || faceRects.isEmpty()) {
+            return safeOriginal;
         }
         
         // Tạo bitmap mới để vẽ
         Bitmap resultBitmap = Bitmap.createBitmap(
-            originalBitmap.getWidth(),
-            originalBitmap.getHeight(),
+            safeOriginal.getWidth(),
+            safeOriginal.getHeight(),
             Bitmap.Config.ARGB_8888
         );
         
         android.graphics.Canvas canvas = new android.graphics.Canvas(resultBitmap);
         
         // Vẽ ảnh gốc
-        canvas.drawBitmap(originalBitmap, 0, 0, null);
+        canvas.drawBitmap(safeOriginal, 0, 0, null);
         
         // Vẽ sticker lên từng khuôn mặt (faceRects đã ở đúng coordinates của bitmap)
         for (android.graphics.Rect faceRect : faceRects) {
@@ -485,17 +910,17 @@ public class MainActivity extends AppCompatActivity {
             // Đảm bảo không vẽ ngoài bounds
             if (x < 0) x = 0;
             if (y < 0) y = 0;
-            if (x + stickerSize > originalBitmap.getWidth()) {
-                stickerSize = originalBitmap.getWidth() - x;
+            if (x + stickerSize > safeOriginal.getWidth()) {
+                stickerSize = safeOriginal.getWidth() - x;
             }
-            if (y + stickerSize > originalBitmap.getHeight()) {
-                stickerSize = originalBitmap.getHeight() - y;
+            if (y + stickerSize > safeOriginal.getHeight()) {
+                stickerSize = safeOriginal.getHeight() - y;
             }
             
-            if (stickerSize > 0 && !currentStickerBitmap.isRecycled()) {
+            if (stickerSize > 0) {
                 // Scale sticker bitmap
                 Bitmap scaledSticker = Bitmap.createScaledBitmap(
-                    currentStickerBitmap,
+                    safeSticker,
                     stickerSize,
                     stickerSize,
                     true
@@ -503,6 +928,11 @@ public class MainActivity extends AppCompatActivity {
                 
                 // Vẽ sticker lên canvas
                 canvas.drawBitmap(scaledSticker, x, y, null);
+                
+                // Giải phóng scaled sticker sau khi dùng (nếu không phải là bitmap gốc)
+                if (scaledSticker != safeSticker) {
+                    recycleBitmap(scaledSticker);
+                }
             }
         }
         
@@ -547,42 +977,49 @@ public class MainActivity extends AppCompatActivity {
         filterList.add(new FilterItem("Vintage", FilterUtils.filterVintage(preview), VINTAGE));
 
         FilterAdapter adapter = new FilterAdapter(this, filterList, filter -> {
-            if (capturedBitmap != null) {
-                Bitmap filteredBitmap = capturedBitmap;
+            Bitmap safeCaptured = getSafeBitmap(capturedBitmap);
+            if (safeCaptured != null) {
+                Bitmap filteredBitmap = safeCaptured;
                 switch (filter.type) {
-                    case NORMAL: filteredBitmap = capturedBitmap; break;
-                    case GRAY: filteredBitmap = FilterUtils.filterGray(capturedBitmap); break;
-                    case SEPIA: filteredBitmap = FilterUtils.filterSepia(capturedBitmap); break;
-                    case BRIGHT: filteredBitmap = FilterUtils.filterBright(capturedBitmap, 1.2f); break;
-                    case INVERT: filteredBitmap = FilterUtils.filterInvert(capturedBitmap); break;
-                    case CONTRAST: filteredBitmap = FilterUtils.filterContrast(capturedBitmap, 1.3f); break;
-                    case HUE: filteredBitmap = FilterUtils.filterHue(capturedBitmap, 45f); break;
-                    case VINTAGE: filteredBitmap = FilterUtils.filterVintage(capturedBitmap); break;
+                    case NORMAL: filteredBitmap = safeCaptured; break;
+                    case GRAY: filteredBitmap = FilterUtils.filterGray(safeCaptured); break;
+                    case SEPIA: filteredBitmap = FilterUtils.filterSepia(safeCaptured); break;
+                    case BRIGHT: filteredBitmap = FilterUtils.filterBright(safeCaptured, 1.2f); break;
+                    case INVERT: filteredBitmap = FilterUtils.filterInvert(safeCaptured); break;
+                    case CONTRAST: filteredBitmap = FilterUtils.filterContrast(safeCaptured, 1.3f); break;
+                    case HUE: filteredBitmap = FilterUtils.filterHue(safeCaptured, 45f); break;
+                    case VINTAGE: filteredBitmap = FilterUtils.filterVintage(safeCaptured); break;
                     // Instagram-like filters
-                    case CLARENDON: filteredBitmap = FilterUtils.filterClarendon(capturedBitmap); break;
-                    case GINGHAM: filteredBitmap = FilterUtils.filterGingham(capturedBitmap); break;
-                    case MOON: filteredBitmap = FilterUtils.filterMoon(capturedBitmap); break;
-                    case LARK: filteredBitmap = FilterUtils.filterLark(capturedBitmap); break;
-                    case REYES: filteredBitmap = FilterUtils.filterReyes(capturedBitmap); break;
-                    case JUNO: filteredBitmap = FilterUtils.filterJuno(capturedBitmap); break;
-                    case SLUMBER: filteredBitmap = FilterUtils.filterSlumber(capturedBitmap); break;
-                    case CREMA: filteredBitmap = FilterUtils.filterCrema(capturedBitmap); break;
-                    case LUDWIG: filteredBitmap = FilterUtils.filterLudwig(capturedBitmap); break;
-                    case ADEN: filteredBitmap = FilterUtils.filterAden(capturedBitmap); break;
-                    case PERPETUA: filteredBitmap = FilterUtils.filterPerpetua(capturedBitmap); break;
-                    case AMARO: filteredBitmap = FilterUtils.filterAmaro(capturedBitmap); break;
-                    case MAYFAIR: filteredBitmap = FilterUtils.filterMayfair(capturedBitmap); break;
-                    case RISE: filteredBitmap = FilterUtils.filterRise(capturedBitmap); break;
-                    case VALENCIA: filteredBitmap = FilterUtils.filterValencia(capturedBitmap); break;
-                    case XPROII: filteredBitmap = FilterUtils.filterXProII(capturedBitmap); break;
-                    case LOFI: filteredBitmap = FilterUtils.filterLoFi(capturedBitmap); break;
-                    case SIERRA: filteredBitmap = FilterUtils.filterSierra(capturedBitmap); break;
-                    case WILLOW: filteredBitmap = FilterUtils.filterWillow(capturedBitmap); break;
-                    default: filteredBitmap = capturedBitmap; break;
+                    case CLARENDON: filteredBitmap = FilterUtils.filterClarendon(safeCaptured); break;
+                    case GINGHAM: filteredBitmap = FilterUtils.filterGingham(safeCaptured); break;
+                    case MOON: filteredBitmap = FilterUtils.filterMoon(safeCaptured); break;
+                    case LARK: filteredBitmap = FilterUtils.filterLark(safeCaptured); break;
+                    case REYES: filteredBitmap = FilterUtils.filterReyes(safeCaptured); break;
+                    case JUNO: filteredBitmap = FilterUtils.filterJuno(safeCaptured); break;
+                    case SLUMBER: filteredBitmap = FilterUtils.filterSlumber(safeCaptured); break;
+                    case CREMA: filteredBitmap = FilterUtils.filterCrema(safeCaptured); break;
+                    case LUDWIG: filteredBitmap = FilterUtils.filterLudwig(safeCaptured); break;
+                    case ADEN: filteredBitmap = FilterUtils.filterAden(safeCaptured); break;
+                    case PERPETUA: filteredBitmap = FilterUtils.filterPerpetua(safeCaptured); break;
+                    case AMARO: filteredBitmap = FilterUtils.filterAmaro(safeCaptured); break;
+                    case MAYFAIR: filteredBitmap = FilterUtils.filterMayfair(safeCaptured); break;
+                    case RISE: filteredBitmap = FilterUtils.filterRise(safeCaptured); break;
+                    case VALENCIA: filteredBitmap = FilterUtils.filterValencia(safeCaptured); break;
+                    case XPROII: filteredBitmap = FilterUtils.filterXProII(safeCaptured); break;
+                    case LOFI: filteredBitmap = FilterUtils.filterLoFi(safeCaptured); break;
+                    case SIERRA: filteredBitmap = FilterUtils.filterSierra(safeCaptured); break;
+                    case WILLOW: filteredBitmap = FilterUtils.filterWillow(safeCaptured); break;
+                    default: filteredBitmap = safeCaptured; break;
+                }
+                
+                // Giải phóng appliedBitmap cũ trước khi gán mới
+                if (appliedBitmap != null && appliedBitmap != capturedBitmap && appliedBitmap != filteredBitmap) {
+                    recycleBitmap(appliedBitmap);
                 }
                 
                 // Nếu có sticker và faces đã detect, vẽ lại sticker lên bitmap đã filter
-                if (currentStickerBitmap != null && !capturedFaceRects.isEmpty()) {
+                Bitmap safeSticker = getSafeBitmap(currentStickerBitmap);
+                if (safeSticker != null && !capturedFaceRects.isEmpty()) {
                     appliedBitmap = drawStickerOnBitmap(filteredBitmap, capturedFaceRects);
                 } else {
                     appliedBitmap = filteredBitmap;
@@ -645,16 +1082,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void backToCamera() {
+        // Dừng countdown nếu đang chạy
+        if (isCountdownRunning) {
+            stopCountdown();
+        }
+        
         imageView.setVisibility(ImageView.GONE);
         btnFilter.setVisibility(ImageButton.GONE);
         btnBack.setVisibility(ImageButton.GONE);
         btnSave.setVisibility(ImageButton.GONE);
-        // Hiển thị gallery và switch camera ở chế độ camera preview
+        // Hiển thị gallery, switch camera và grid ở chế độ camera preview
         btnGallery.setVisibility(ImageButton.VISIBLE);
         btnSwitchCamera.setVisibility(ImageButton.VISIBLE);
+        btnGrid.setVisibility(ImageButton.VISIBLE);
         rvFilters.setVisibility(RecyclerView.GONE);
         previewView.setVisibility(PreviewView.VISIBLE);
         btnCapture.setVisibility(ImageButton.VISIBLE);
+        
+        // Giải phóng bitmap khi quay lại camera (giữ lại capturedBitmap để có thể filter lại)
+        // Chỉ giải phóng appliedBitmap nếu nó khác capturedBitmap
+        if (appliedBitmap != null && appliedBitmap != capturedBitmap) {
+            recycleBitmap(appliedBitmap);
+            appliedBitmap = null;
+        }
 
         if (hasCameraPermission()) startCamera();
     }
@@ -698,8 +1148,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopCamera() {
         try {
-            ProcessCameraProvider cameraProvider = ProcessCameraProvider.getInstance(this).get();
-            cameraProvider.unbindAll();
+            if (cameraProvider != null) {
+                cameraProvider.unbindAll();
+            } else {
+                ProcessCameraProvider provider = ProcessCameraProvider.getInstance(this).get();
+                provider.unbindAll();
+            }
         } catch (Exception ignored) {}
     }
 
@@ -752,11 +1206,11 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    private void openGalleryApp() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+    private void pickImageFromGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_PICK_IMAGE);
         } else {
             Toast.makeText(this, "Không tìm thấy ứng dụng Thư viện", Toast.LENGTH_SHORT).show();
         }
@@ -772,6 +1226,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        
+        // Xử lý kết quả chọn ảnh từ gallery
+        if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            Uri selectedImageUri = data.getData();
+            if (selectedImageUri != null) {
+                showSelectedImage(selectedImageUri);
+            }
+            return;
+        }
         
         // Xử lý kết quả authorization từ UserRecoverableAuthIOException
         if (requestCode == REQUEST_AUTHORIZE && resultCode == RESULT_OK) {
@@ -848,7 +1311,10 @@ public class MainActivity extends AppCompatActivity {
                         .apply();
                 try {
                     driveHelper = new GoogleDriveHelper(this, accountName);
-                    Toast.makeText(this, "Đã kết nối với Google Drive: " + accountName, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, " Đã kết nối Google Drive: " + accountName, Toast.LENGTH_SHORT).show();
+                    
+                    // Cập nhật trạng thái nút Google Drive
+                    updateGoogleDriveButton();
                     
                     // Nếu có bitmap đang chờ sync, tự động sync lại
                     if (pendingSyncBitmap != null) {
@@ -862,6 +1328,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast.makeText(this, "Lỗi kết nối Google Drive: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    updateGoogleDriveButton();
                 }
             } else {
                 // Debug: Log để xem data có gì
@@ -895,6 +1362,18 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // Hiển thị ProgressDialog
+        runOnUiThread(() -> {
+            if (uploadProgressDialog == null || !uploadProgressDialog.isShowing()) {
+                uploadProgressDialog = new android.app.ProgressDialog(this);
+                uploadProgressDialog.setMessage("Đang tải lên Google Drive...");
+                uploadProgressDialog.setProgressStyle(android.app.ProgressDialog.STYLE_SPINNER);
+                uploadProgressDialog.setIndeterminate(true);
+                uploadProgressDialog.setCancelable(false);
+                uploadProgressDialog.show();
+            }
+        });
+
         // Upload trong background thread
         new Thread(() -> {
             try {
@@ -906,14 +1385,15 @@ public class MainActivity extends AppCompatActivity {
                     throw new Exception("Drive helper is null");
                 }
                 
-                if (appliedBitmap == null) {
-                    throw new Exception("Bitmap is null");
+                Bitmap safeBitmap = getSafeBitmap(appliedBitmap);
+                if (safeBitmap == null) {
+                    throw new Exception("Bitmap is null or recycled");
                 }
                 
                 String fileName = "CameraX_" + System.currentTimeMillis() + ".jpg";
                 android.util.Log.d("MainActivity", "Uploading file: " + fileName);
                 
-                String fileId = driveHelper.uploadImage(appliedBitmap, fileName);
+                String fileId = driveHelper.uploadImage(safeBitmap, fileName);
                 
                 if (fileId == null || fileId.isEmpty()) {
                     throw new Exception("Upload returned null or empty file ID");
@@ -921,12 +1401,23 @@ public class MainActivity extends AppCompatActivity {
                 
                 android.util.Log.d("MainActivity", "Upload successful. File ID: " + fileId);
                 runOnUiThread(() -> {
-                    Toast.makeText(this, "Đã đồng bộ lên Google Drive!", Toast.LENGTH_SHORT).show();
+                    // Đóng ProgressDialog
+                    if (uploadProgressDialog != null && uploadProgressDialog.isShowing()) {
+                        uploadProgressDialog.dismiss();
+                    }
+                    Toast.makeText(this, " Đã đồng bộ lên Google Drive!", Toast.LENGTH_SHORT).show();
                 });
             } catch (IOException e) {
                 e.printStackTrace();
                 android.util.Log.e("MainActivity", "IOException during sync", e);
                 String errorMsg = e.getMessage();
+                
+                // Đóng ProgressDialog khi có lỗi
+                runOnUiThread(() -> {
+                    if (uploadProgressDialog != null && uploadProgressDialog.isShowing()) {
+                        uploadProgressDialog.dismiss();
+                    }
+                });
                 
                 // Kiểm tra nếu là lỗi authentication
                 if (errorMsg != null && (errorMsg.contains("AUTH_REQUIRED") || 
@@ -966,12 +1457,46 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 
+                // Kiểm tra lỗi 403 (Permission denied) - thường do email chưa được thêm vào Test Users
+                if (errorMsg != null && errorMsg.contains("Permission denied")) {
+                    final String finalErrorMsg = errorMsg; // Tạo biến final để dùng trong lambda
+                    runOnUiThread(() -> {
+                        new AlertDialog.Builder(this)
+                                .setTitle("Lỗi quyền truy cập")
+                                .setMessage(finalErrorMsg + "\n\n" +
+                                        "HƯỚNG DẪN KHẮC PHỤC:\n\n" +
+                                        "1. Vào Google Cloud Console\n" +
+                                        "2. APIs & Services > OAuth consent screen\n" +
+                                        "3. Thêm email vào mục 'Test users'\n" +
+                                        "4. Hoặc publish app để tất cả users có thể dùng\n\n" +
+                                        "Nếu đã thêm email, vui lòng đăng xuất và đăng nhập lại.")
+                                .setPositiveButton("Đăng xuất", (dialog, which) -> {
+                                    // Đăng xuất
+                                    getSharedPreferences("camera_prefs", MODE_PRIVATE)
+                                            .edit()
+                                            .remove(PREF_ACCOUNT_NAME)
+                                            .apply();
+                                    driveHelper = null;
+                                    updateGoogleDriveButton();
+                                    Toast.makeText(this, "Đã đăng xuất. Vui lòng đăng nhập lại sau khi thêm email vào Test Users.", Toast.LENGTH_LONG).show();
+                                })
+                                .setNegativeButton("OK", null)
+                                .show();
+                    });
+                    return;
+                }
+                
                 if (errorMsg == null || errorMsg.isEmpty()) {
                     errorMsg = "Lỗi kết nối khi đồng bộ";
                 }
                 final String finalErrorMsg = errorMsg;
                 runOnUiThread(() -> {
-                    Toast.makeText(this, " Lỗi đồng bộ: " + finalErrorMsg, Toast.LENGTH_LONG).show();
+                    // Hiển thị dialog thay vì Toast để người dùng có thể đọc kỹ hơn
+                    new AlertDialog.Builder(this)
+                            .setTitle("Lỗi đồng bộ")
+                            .setMessage(finalErrorMsg)
+                            .setPositiveButton("OK", null)
+                            .show();
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -982,6 +1507,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 final String finalErrorMsg = errorMsg;
                 runOnUiThread(() -> {
+                    // Đóng ProgressDialog khi có lỗi
+                    if (uploadProgressDialog != null && uploadProgressDialog.isShowing()) {
+                        uploadProgressDialog.dismiss();
+                    }
                     Toast.makeText(this, " Lỗi: " + finalErrorMsg, Toast.LENGTH_LONG).show();
                 });
             }
@@ -993,6 +1522,8 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         updateCameraState();
         loadLatestGalleryImage();
+        // Cập nhật trạng thái nút Google Drive khi quay lại activity
+        updateGoogleDriveButton();
     }
 
     // ==================== STICKER METHODS ====================
@@ -1040,22 +1571,28 @@ public class MainActivity extends AppCompatActivity {
         StickerAdapter adapter = new StickerAdapter(this, stickerList, stickerResId -> {
             // Nếu click lại sticker đang active thì tắt nó đi
             if (currentStickerResId != null && currentStickerResId.equals(stickerResId)) {
-                // Tắt sticker
+                // Tắt sticker - giải phóng bitmap cũ
+                recycleBitmap(currentStickerBitmap);
                 currentStickerBitmap = null;
                 currentStickerResId = null;
                 faceOverlayView.setSticker(null);
                 
                 // Nếu đang xem ảnh đã chụp, cập nhật lại ảnh không có sticker
-                if (capturedBitmap != null) {
+                Bitmap safeCaptured = getSafeBitmap(capturedBitmap);
+                if (safeCaptured != null) {
                     // Giữ lại filter hiện tại nhưng bỏ sticker
                     // Nếu appliedBitmap khác capturedBitmap (có filter), giữ filter đó
                     // Nếu không, dùng capturedBitmap gốc
-                    if (appliedBitmap != null && appliedBitmap != capturedBitmap) {
+                    Bitmap safeApplied = getSafeBitmap(appliedBitmap);
+                    if (safeApplied != null && safeApplied != safeCaptured) {
                         // Có filter đang áp dụng, chỉ cần bỏ sticker đi
                         // Sẽ cần detect lại filter, nhưng để đơn giản thì dùng capturedBitmap
-                        appliedBitmap = capturedBitmap;
+                        if (appliedBitmap != safeCaptured) {
+                            recycleBitmap(appliedBitmap);
+                        }
+                        appliedBitmap = safeCaptured;
                     } else {
-                        appliedBitmap = capturedBitmap;
+                        appliedBitmap = safeCaptured;
                     }
                     imageView.setImageBitmap(appliedBitmap);
                 }
@@ -1063,15 +1600,22 @@ public class MainActivity extends AppCompatActivity {
                 bottomSheet.dismiss();
                 Toast.makeText(this, "Đã tắt sticker", Toast.LENGTH_SHORT).show();
             } else {
-                // Chọn sticker mới
+                // Chọn sticker mới - giải phóng sticker cũ trước
+                recycleBitmap(currentStickerBitmap);
+                
                 currentStickerResId = stickerResId;
                 currentStickerBitmap = BitmapFactory.decodeResource(getResources(), stickerResId);
                 FaceOverlayView.StickerType stickerType = getStickerType(stickerResId);
                 faceOverlayView.setSticker(currentStickerBitmap, stickerType);
                 
                 // Nếu đang xem ảnh đã chụp, vẽ lại sticker lên ảnh
-                if (capturedBitmap != null && !capturedFaceRects.isEmpty()) {
-                    appliedBitmap = drawStickerOnBitmap(capturedBitmap, capturedFaceRects);
+                Bitmap safeCaptured = getSafeBitmap(capturedBitmap);
+                if (safeCaptured != null && !capturedFaceRects.isEmpty()) {
+                    // Giải phóng appliedBitmap cũ nếu khác capturedBitmap
+                    if (appliedBitmap != null && appliedBitmap != safeCaptured) {
+                        recycleBitmap(appliedBitmap);
+                    }
+                    appliedBitmap = drawStickerOnBitmap(safeCaptured, capturedFaceRects);
                     imageView.setImageBitmap(appliedBitmap);
                 }
                 
@@ -1086,9 +1630,51 @@ public class MainActivity extends AppCompatActivity {
         bottomSheet.show();
     }
 
+    // Cập nhật trạng thái nút Google Drive
+    private void updateGoogleDriveButton() {
+        if (btnGoogleDrive == null) return;
+        
+        boolean isLoggedIn = driveHelper != null;
+        
+        // Cập nhật độ mờ của nút
+        if (isLoggedIn) {
+            btnGoogleDrive.setAlpha(1.0f); // Hiển thị đầy đủ khi đã đăng nhập
+        } else {
+            btnGoogleDrive.setAlpha(0.6f); // Mờ hơn khi chưa đăng nhập
+        }
+        
+        // Cập nhật indicator
+        if (driveStatusIndicator != null) {
+            driveStatusIndicator.setVisibility(isLoggedIn ? View.VISIBLE : View.GONE);
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        
+        // Dừng countdown nếu đang chạy
+        stopCountdown();
+        
+        // Đóng ProgressDialog nếu đang hiển thị
+        if (uploadProgressDialog != null && uploadProgressDialog.isShowing()) {
+            uploadProgressDialog.dismiss();
+        }
+        
+        // Giải phóng tất cả bitmap để tránh memory leak
+        recycleBitmap(capturedBitmap);
+        recycleBitmap(appliedBitmap);
+        recycleBitmap(currentStickerBitmap);
+        recycleBitmap(pendingSyncBitmap);
+        
+        capturedBitmap = null;
+        appliedBitmap = null;
+        currentStickerBitmap = null;
+        pendingSyncBitmap = null;
+        
+        // Stop camera
+        stopCamera();
+        
         cameraExecutor.shutdown();
         if (faceDetector != null) {
             faceDetector.close();

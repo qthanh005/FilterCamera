@@ -1402,6 +1402,8 @@ color common_google_signin_btn_text_light_disabled
 color common_google_signin_btn_text_light_focused
 color common_google_signin_btn_text_light_pressed
 color common_google_signin_btn_tint
+color countdown_bg_end
+color countdown_bg_start
 color design_bottom_navigation_shadow_color
 color design_box_stroke_color
 color design_dark_default_color_background
@@ -2120,12 +2122,16 @@ color secondary_text_default_material_dark
 color secondary_text_default_material_light
 color secondary_text_disabled_material_dark
 color secondary_text_disabled_material_light
+color switch_thumb
 color switch_thumb_disabled_material_dark
 color switch_thumb_disabled_material_light
 color switch_thumb_material_dark
 color switch_thumb_material_light
 color switch_thumb_normal_material_dark
 color switch_thumb_normal_material_light
+color switch_track
+color switch_track_checked
+color switch_track_unchecked
 color tooltip_background_dark
 color tooltip_background_light
 color white
@@ -3051,6 +3057,8 @@ drawable common_google_signin_btn_text_light
 drawable common_google_signin_btn_text_light_focused
 drawable common_google_signin_btn_text_light_normal
 drawable common_google_signin_btn_text_light_normal_background
+drawable countdown_bg
+drawable countdown_bg_ripple
 drawable default_preview
 drawable design_fab_background
 drawable design_ic_visibility
@@ -3077,6 +3085,8 @@ drawable ic_clear_black_24
 drawable ic_clock_black_24dp
 drawable ic_filter
 drawable ic_gallery
+drawable ic_google_drive
+drawable ic_grid
 drawable ic_keyboard_black_24dp
 drawable ic_launcher_background
 drawable ic_launcher_foreground
@@ -3089,6 +3099,7 @@ drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
 drawable ic_search_black_24
 drawable ic_switch_camera
+drawable ic_timer
 drawable indeterminate_static
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
@@ -3271,9 +3282,12 @@ id bounceEnd
 id bounceStart
 id btnBackToCamera
 id btnCapture
+id btnCloseMenu
 id btnCloseSticker
 id btnFilter
 id btnGallery
+id btnGoogleDrive
+id btnGrid
 id btnNext
 id btnSave
 id btnSkip
@@ -3283,6 +3297,8 @@ id buttonPanel
 id cache_measures
 id callMeasure
 id cancel_button
+id cardCountdown
+id cardGrid
 id carryVelocity
 id center
 id centerCrop
@@ -3314,6 +3330,8 @@ id continuousVelocity
 id controlLayout
 id coordinator
 id cos
+id countdownBg
+id countdownContainer
 id counterclockwise
 id cradle
 id currentState
@@ -3352,6 +3370,7 @@ id dragLeft
 id dragRight
 id dragStart
 id dragUp
+id driveStatusIndicator
 id dropdown_menu
 id easeIn
 id easeInOut
@@ -3397,6 +3416,7 @@ id glide_custom_view_target_tag
 id gone
 id graph
 id graph_wrap
+id gridOverlayView
 id group_divider
 id grouping
 id groups
@@ -3426,6 +3446,8 @@ id invisible
 id inward
 id italic
 id item_touch_helper_previous_elevation
+id ivCountdownIcon
+id ivGridIcon
 id jumpToEnd
 id jumpToStart
 id labeled
@@ -3466,6 +3488,8 @@ id material_timepicker_ok_button
 id material_timepicker_view
 id material_value_index
 id matrix
+id menu_countdown
+id menu_grid
 id message
 id middle
 id mini
@@ -3566,6 +3590,7 @@ id right
 id rightToLeft
 id right_icon
 id right_side
+id rippleCircle
 id rounded
 id row_index_key
 id rvFilters
@@ -3631,6 +3656,8 @@ id stretch
 id submenuarrow
 id submit_area
 id supportScrollUp
+id switchCountdown
+id switchGrid
 id tabMode
 id tag_accessibility_actions
 id tag_accessibility_clickable_spans
@@ -3680,10 +3707,15 @@ id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
 id triangle
+id tvCountdown
+id tvCountdownSubtitle
+id tvCountdownTitle
 id tvDescription
 id tvFilterName
+id tvGridSubtitle
+id tvGridTitle
+id tvMenuTitle
 id tvPermissionStatus
-id tvStickerHint
 id tvStickerTitle
 id tvTitle
 id unchecked
@@ -3828,6 +3860,7 @@ layout abc_select_dialog_material
 layout abc_tooltip
 layout activity_intro
 layout activity_main
+layout bottom_sheet_grid_menu
 layout bottom_sheet_sticker
 layout custom_dialog
 layout design_bottom_navigation_item
@@ -3912,6 +3945,7 @@ layout select_dialog_item_material
 layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
 layout support_simple_spinner_dropdown_item
+menu grid_menu
 mipmap ic_launcher
 mipmap ic_launcher_round
 plurals mtrl_badge_content_description
@@ -4392,6 +4426,7 @@ style CardView
 style CardView_Dark
 style CardView_Light
 style CircleImage
+style IntroButtonStyle
 style MaterialAlertDialog_Material3
 style MaterialAlertDialog_Material3_Animation
 style MaterialAlertDialog_Material3_Body_Text

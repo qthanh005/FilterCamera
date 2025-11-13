@@ -2,4 +2,13 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Switch colors -->
+    <color name="switch_thumb">#FFFFFF</color>
+    <color name="switch_track_checked">#4CAF50</color>
+    <color name="switch_track_unchecked">#666666</color>
+    
+    <!-- Countdown colors -->
+    <color name="countdown_bg_start">#FF6B6B</color>
+    <color name="countdown_bg_end">#FF8E53</color>
 </resources>

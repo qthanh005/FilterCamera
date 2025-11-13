@@ -65,20 +65,10 @@
         <!-- Nút Next -->
         <Button
             android:id="@+id/btnNext"
+            style="@style/IntroButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="56dp"
-            android:text="Tiếp theo"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@drawable/btn_intro_next"
-            android:paddingStart="40dp"
-            android:paddingEnd="40dp"
-            android:textAllCaps="false"
-            android:elevation="6dp"
-            android:stateListAnimator="@null"
-            android:minWidth="0dp"
-            android:minHeight="0dp" />
+            android:text="Tiếp theo" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

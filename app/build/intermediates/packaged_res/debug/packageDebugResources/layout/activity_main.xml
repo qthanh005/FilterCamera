@@ -32,6 +32,107 @@
         app:layout_constraintStart_toStartOf="@+id/previewView"
         app:layout_constraintEnd_toEndOf="@+id/previewView" />
 
+    <!-- Grid Overlay để hiển thị grid lines -->
+    <com.example.cameraapp.GridOverlayView
+        android:id="@+id/gridOverlayView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintTop_toTopOf="@+id/previewView"
+        app:layout_constraintBottom_toBottomOf="@+id/previewView"
+        app:layout_constraintStart_toStartOf="@+id/previewView"
+        app:layout_constraintEnd_toEndOf="@+id/previewView" />
+
+    <!-- Countdown Timer Container -->
+    <FrameLayout
+        android:id="@+id/countdownContainer"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@+id/previewView"
+        app:layout_constraintBottom_toBottomOf="@+id/previewView"
+        app:layout_constraintStart_toStartOf="@+id/previewView"
+        app:layout_constraintEnd_toEndOf="@+id/previewView">
+
+        <!-- Background Circle với gradient -->
+        <View
+            android:id="@+id/countdownBg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/countdown_bg"
+            android:alpha="0.9" />
+
+        <!-- Countdown Timer Text -->
+        <TextView
+            android:id="@+id/tvCountdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="80sp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:shadowColor="#000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="8" />
+
+        <!-- Ripple Effect Circle -->
+        <View
+            android:id="@+id/rippleCircle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/countdown_bg"
+            android:alpha="0"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+    <!-- Nút Google Drive (góc trên phải) -->
+    <ImageButton
+        android:id="@+id/btnGoogleDrive"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/btn_round_dark"
+        android:padding="10dp"
+        android:src="@drawable/ic_google_drive"
+        android:contentDescription="Google Drive"
+        android:elevation="8dp"
+        app:tint="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Indicator đã đăng nhập Google Drive -->
+    <View
+        android:id="@+id/driveStatusIndicator"
+        android:layout_width="8dp"
+        android:layout_height="8dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/dot_indicator_selected"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Nút Grid (góc trên trái) -->
+    <ImageButton
+        android:id="@+id/btnGrid"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:background="@drawable/btn_round_dark"
+        android:padding="10dp"
+        android:src="@drawable/ic_grid"
+        android:contentDescription="Grid"
+        android:elevation="8dp"
+        app:tint="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <!-- ImageView hiển thị ảnh chụp -->
     <ImageView
         android:id="@+id/imageView"
@@ -58,28 +159,6 @@
         app:layout_constraintBottom_toTopOf="@+id/rvFilters"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- TextView hint sticker -->
-    <TextView
-        android:id="@+id/tvStickerHint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Nhấn giữ nút chụp để chọn sticker"
-        android:textSize="15sp"
-        android:textColor="#FFFFFF"
-        android:background="#80000000"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:visibility="gone"
-        android:elevation="8dp"
-        android:alpha="0"
-        app:layout_constraintBottom_toTopOf="@+id/controlLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        android:layout_marginBottom="16dp" />
 
     <!-- RecyclerView filter -->
     <androidx.recyclerview.widget.RecyclerView
